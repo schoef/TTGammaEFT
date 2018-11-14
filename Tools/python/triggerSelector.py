@@ -1,40 +1,30 @@
-# not yet optimized for ttgamma
+# check for ttgamma
 class triggerSelector:
     def __init__(self, year):
         if year == 2016:
-            self.mmm    = ["HLT_TripleMu_12_10_5"]
-            self.mm     = ["HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ","HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ"]
-            self.m      = ["HLT_SingleMuTTZ"]
-            self.eee    = ["HLT_Ele16_Ele12_Ele8_CaloIdL_TrackIdL"]
-            self.ee     = ["HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ"]
-            self.e      = ["HLT_SingleEleTTZ"]
-            self.em     = ["HLT_Mu23_TrkIsoVVL_Ele8_CaloIdL_TrackIdL_IsoVL", "HLT_Mu23_TrkIsoVVL_Ele8_CaloIdL_TrackIdL_IsoVL_DZ", "HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL", "HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ"]
-            self.eem    = ["HLT_Mu8_DiEle12_CaloIdL_TrackIdL"]
-            self.emm    = ["HLT_DiMu9_Ele9_CaloIdL_TrackIdL"]
+            self.mm     = ["HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL","HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ","HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL","HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ","HLT_Mu30_TkMu11"]
+            self.m      = ["HLT_IsoMu24","HLT_IsoTkMu24","HLT_Mu50","HLT_TkMu50","HLT_Mu45_eta2p1"]
+            self.ee     = ["HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ","HLT_Ele17_Ele12_CaloIdL_TrackIdL_IsoVL_DZ","HLT_DoubleEle33_CaloIdL_GsfTrkIdVL","HLT_DoubleEle33_CaloIdL_GsfTrkIdVL_MW"]
+            self.e      = ["HLT_Ele27_WPTight_Gsf","HLT_Ele105_CaloIdVT_GsfTrkIdT","HLT_Ele115_CaloIdVT_GsfTrkIdT"]
+            self.em     = ["HLT_Mu23_TrkIsoVVL_Ele8_CaloIdL_TrackIdL_IsoVL","HLT_Mu23_TrkIsoVVL_Ele8_CaloIdL_TrackIdL_IsoVL_DZ","HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL","HLT_Mu17_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL","HLT_Mu8_TrkIsoVVL_Ele17_CaloIdL_TrackIdL_IsoVL","HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL","HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ","HLT_Mu30_Ele30_CaloIdL_GsfTrkIdVL"]
 
         elif year == 2017:
-            self.mmm    = ["HLT_mmm"]
-            self.mm     = ["HLT_mumu"]
-            self.m      = ["HLT_mu"]
-            self.eee    = ["HLT_eee"]
-            self.ee     = ["HLT_ee"]
-            self.e      = ["HLT_ele"]
-            self.em     = ["HLT_mue"]
-            self.eem    = ["HLT_mee"]
-            self.emm    = ["HLT_mme"]
+            self.mm     = []
+            self.m      = []
+            self.ee     = []
+            self.e      = []
+            self.em     = []
 
         else:
             raise NotImplementedError("Trigger selection %r not implemented"%year)
 
         # define which triggers should be used for which dataset
-        self.DoubleMuon     = "(%s)"%"||".join(self.mmm + self.mm)
-        self.DoubleEG       = "(%s)"%"||".join(self.eee + self.ee)
-        self.MuonEG         = "(%s)"%"||".join(self.em + self.eem + self.emm)
-        self.SingleMuon     = "(%s)"%"||".join(self.m)
-        self.SingleElectron = "(%s)"%"||".join(self.e)
+        self.DoubleMuon     = "(%s)"%"||".join(self.mm + self.m)
+        self.DoubleEG       = "(%s)"%"||".join(self.e + self.e)
+        self.MuonEG         = "(%s)"%"||".join(self.em + self.e + self.m)
 
         # define an arbitrary hierarchy
-        self.PDHierarchy = [ "DoubleMuon", "DoubleEG", "MuonEG", "SingleMuon", "SingleElectron" ]
+        self.PDHierarchy = [ "DoubleEG", "DoubleMuon", "MuonEG" ]
 
     def __getVeto(self, cutString):
         return "!%s"%cutString
