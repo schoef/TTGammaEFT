@@ -20,9 +20,8 @@ if os.environ['USER'] in ['llechner']:
     skim_directory                      = "/afs/hephy.at/data/llechner01/TTGammaEFT/skims/"
     skim_output_directory               = "/afs/hephy.at/data/llechner01/TTGammaEFT/skims/"
     plot_directory                      = "/afs/hephy.at/user/l/llechner/www/TTGammaEFT/"
-    data_directory                      = "/afs/hephy.at/data/llechner01/cmgTuples/"
-    postprocessing_output_directory     = "/afs/hephy.at/data/llechner01/TTGammaEFT/cmgTuples/"
-    nanopostprocessing_output_directory = "/afs/hephy.at/data/llechner01/TTGammaEFT/nanoTuples/"
+    data_directory                      = "/afs/hephy.at/data/llechner01/TTGammaEFT/nanoTuples/"
+    postprocessing_output_directory     = "/afs/hephy.at/data/llechner01/TTGammaEFT/nanoTuples/"
     analysis_results                    = results_directory
     
     runOnGentT2 = False
