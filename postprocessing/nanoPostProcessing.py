@@ -264,6 +264,7 @@ new_variables += [ 'ht/F', 'metSig/F' ]
 new_variables += [ 'nAllJet/I', 'nBTag/I']
 new_variables += [ 'nLeptonTight/I', 'nLeptonVeto/I']
 new_variables += [ 'nElectron/I', 'nMuon/I']
+new_variables += [ 'nElectronTight/I', 'nMuonTight/I']
 new_variables += [ 'photonJetdR/F', 'photonLepdR/F' ] 
 new_variables += [ 'MET_pt_photonEstimated/F', 'MET_phi_photonEstimated/F', 'METSig_photonEstimated/F' ]
 new_variables += [ 'nJet/I' ] 
@@ -443,13 +444,17 @@ def filler( event ):
 
     looseElectrons  = filter( lambda l:abs(l['pdgId'])==11, looseLeptons)
     looseMuons      = filter( lambda l:abs(l['pdgId'])==13, looseLeptons)
+    tightElectrons  = filter( lambda l:abs(l['pdgId'])==11, tightLeptons)
+    tightMuons      = filter( lambda l:abs(l['pdgId'])==13, tightLeptons)
 
     # Store lepton number
-    event.nLepton       = len(looseLeptons)
-    event.nLeptonTight  = len(tightLeptons)
-    event.nLeptonVeto   = len(vetoLeptons)         
-    event.nElectron     = len(looseElectrons)
-    event.nMuon         = len(looseMuons)
+    event.nLepton        = len(looseLeptons)
+    event.nLeptonTight   = len(tightLeptons)
+    event.nLeptonVeto    = len(vetoLeptons)         
+    event.nElectron      = len(looseElectrons)
+    event.nMuon          = len(looseMuons)
+    event.nElectronTight = len(tightElectrons)
+    event.nMuonTight     = len(tightMuons)
 
     fill_vector_collection( event, "Lepton", nanoLeptonVars, looseLeptons )
 #    fill_vector_collection( event, "Electron", nanoElectronVars, looseElectrons )
