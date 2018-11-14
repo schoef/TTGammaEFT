@@ -7,22 +7,26 @@ from TTGammaEFT.Tools.helpers import getVarValue, getObjDict, deltaR
 
 nanoElectronVarString = "deltaEtaSC/F,dr03EcalRecHitSumEt/F,dr03HcalDepth1TowerSumEt/F,dr03TkSumPt/F,dxy/F,dxyErr/F,dz/F,dzErr/F,eCorr/F,eInvMinusPInv/F,energyErr/F,eta/F,hoe/F,ip3d/F,mass/F,miniPFRelIso_all/F,miniPFRelIso_chg/F,pfRelIso03_all/F,pfRelIso03_chg/F,phi/F,pt/F,r9/F,sieie/F,sip3d/F,mvaTTH/F,charge/F,cutBased/F,jetIdx/I,pdgId/I,photonIdx/I,tightCharge/I,vidNestedWPBitmap/I,convVeto/I,cutBased_HEEP/I,isPFcand/I,lostHits/I,genPartIdx/I,genPartFlav/I,cleanmask/I"
 nanoMuonVarString     = "dxy/F,dxyErr/F,dz/F,dzErr/F,eta/F,mass/F,dxy/F,miniPFRelIso_all/F,miniPFRelIso_chg/F,pfRelIso03_all/F,pfRelIso03_chg/F,pfRelIso04_all/F,phi/F,pt/F,ptErr/F,segmentComp/F,sip3d/F,mvaTTH/F,charge/I,jetIdx/I,nStations/I,nTrackerLayers/I,pdgId/I,tightCharge/I,highPtId/I,isPFcand/I,mediumId/I,softId/I,tightId/I,genPartIdx/I,genPartFlav/I,cleanmask/I"
+nanoLeptonVarString   = ','.join( set( nanoElectronVarString.split(',') + nanoMuonVarString.split(',') ) )
 nanoTauVarString      = "chargedIso/F,dxy/F,dz/F,eta/F,footprintCorr/F,leadTkDeltaEta/F,leadTkDeltaPhi/F,leadTkPtOverTauPt/F,mass/F,neutralIso/F,phi/F,photonsOutsideSignalCone/F,pt/F,puCorr/F,rawAntiEle/F,rawIso/F,rawMVAnewDM/F,rawMVAoldDM/F,rawMVAoldDMdR03/F,charge/I,decayMode/I,jetIdx/I,rawAntiEleCat/F,idAntiEle/I,idAntiMu/I,idDecayMode/I,idDecayModeNewDMs/I,idMVAnewDM/I,idMVAoldDM/I,idMVAoldDMdR03/I,genPartIdx/I,genPartFlav/I,cleanmask/I"
 nanoPhotonVarString   = "eta/F,eCorr/F,energyErr/F,hoe/F,mass/F,mvaID/I,pfRelIso03_all/F,pfRelIso03_chg/F,phi/F,pt/F,r9/F,sieie/F,charge/I,cutBased/I,electronIdx/I,jetIdx/I,pdgId/I,vidNestedWPBitmap/I,electronVeto/I,mvaID_WP80/I,mvaID_WP90/I,pixelSeed/I,genPartIdx/I,genPartFlav/I,cleanmask/I"
-nanoJetVarString      = "area/F,btagCMVA/F,btagCSVV2/F,btagDeepB/F,btagDeepC/F,chEmEF/F,chHEF/F,eta/F,mass/F,neEmEF/F,neHEF/I,phi/F,pt/F,qgl/F,rawFactor/F,bReg/F,electronIdx1/I,electronIdx2/I,jetId/I,muonIdx1/I,muonIdx2/I,nConstituents/I,nElectrons/I,nMuons/I,puId/I,genJetIdx/I,hadronFlavour/I,partonFlavour/I,cleanmask/I"
+nanoJetVarString      = "area/F,btagCMVA/F,btagCSVV2/F,btagDeepB/F,btagDeepC/F,chEmEF/F,chHEF/F,eta/F,mass/F,neEmEF/F,neHEF/F,phi/F,pt/F,qgl/F,rawFactor/F,bReg/F,electronIdx1/I,electronIdx2/I,jetId/I,muonIdx1/I,muonIdx2/I,nConstituents/I,nElectrons/I,nMuons/I,puId/I,genJetIdx/I,hadronFlavour/I,partonFlavour/I,cleanmask/I"
 nanoBJetVarString     = 'pt/F,eta/F,phi/F'
 nanoGenVarString      = "eta/F,mass/F,pt/F,phi/F,pdgId/I,genPartIdxMother/I,status/I,statusFlags/I"
 nanoGenJetVarString   = "eta/F,mass/F,pt/F,phi/F,partonFlavour/F,hadronFlavour/F"
 
 nanoElectronVars = [item.split('/')[0] for item in nanoElectronVarString.split(',')]
 nanoMuonVars     = [item.split('/')[0] for item in nanoMuonVarString.split(',')]
+nanoLeptonVars   = [item.split('/')[0] for item in nanoLeptonVarString.split(',')]
 nanoTauVars      = [item.split('/')[0] for item in nanoTauVarString.split(',')] 
 nanoPhotonVars   = [item.split('/')[0] for item in nanoPhotonVarString.split(',')]
 nanoJetVars      = [item.split('/')[0] for item in nanoJetVarString.split(',')]
 nanoBJetVars     = [item.split('/')[0] for item in nanoBJetVarString.split(',')]
 nanoGenVars      = [item.split('/')[0] for item in nanoGenVarString.split(',')]
 nanoGenJetVars   = [item.split('/')[0] for item in nanoGenJetVarString.split(',')]
+
 idCutBased       = {'loose':1 ,'medium':2, 'tight':3}
+defaultValue     = -999
 
 # General Selection Functions
 def particlePtEtaSelection( collection, ptCut=10, absEtaCut=2.4 ):
@@ -30,12 +34,12 @@ def particlePtEtaSelection( collection, ptCut=10, absEtaCut=2.4 ):
     parts.sort( key = lambda l:-l['pt'] )
     return parts
 
-def jetLeptonCleaning( jets, leptons, dRCut = 0.4 ):
+def jetCleaning( jets, otherParticles, dRCut = 0.4 ):
     res = []
     for jet in jets:
         clean = True
-        for lepton in leptons:
-            if deltaR(lepton, jet) < dRCut:
+        for otherParticle in otherParticles:
+            if deltaR(otherParticle, jet) < dRCut:
                 clean = False
                 break
         if clean:
@@ -102,10 +106,16 @@ def filterBJets( jets, tagger = 'DeepCSV', year = 2016 ):
 
 # Reco Selectors
 def jetSelector():
+    # hadron multiplicity > 0 still missing
     def func(l):
         return \
             l["pt"]                 > 30 \
-            and abs(l["eta"])       < 2.4
+            and abs(l["eta"])       < 2.4 \
+            and l["nConstituents"]  > 1 \
+            and l["neHEF"]          < 0.99 \
+            and l["neEmEF"]         < 0.99 \
+            and l["chEmEF"]         < 0.99 \
+            and l["chHEF"]          > 0.
     return func
 
 def muonSelector( lepton_selection ):
@@ -219,20 +229,6 @@ def photonSelector( photon_selection ):
                 and ((g['sieie'] < 0.01022 and abs(g["eta"]) < 1.479) or (g['sieie'] < 0.03001 and abs(g["eta"]) > 1.479)) 
         return func
 
-    if photon_selection == 'overlapTTGamma':
-        def func(g):
-            return \
-                g["pt"]                 > 13 \
-                and abs(g["eta"])       < 3.0
-        return func
-
-    if photon_selection == 'overlapZGamma':
-        def func(g):
-            return \
-                g["pt"]                 > 15 \
-                and abs(g["eta"])       < 2.6
-        return func
-
 # Gen Selectors
 def genJetSelector():
     def func(l):
@@ -248,12 +244,27 @@ def genLeptonSelector():
             and abs(l["eta"])       < 2.4
     return func
 
-def genPhotonSelector():
-    def func(l):
-        return \
-            l["pt"]                 > 13 \
-            and abs(l["eta"])       < 2.4
-    return func
+def genPhotonSelector( photon_selection = None ):
+    if photon_selection == 'overlapTTGamma':
+        def func(g):
+            return \
+                g["pt"]                 > 13 \
+                and abs(g["eta"])       < 3.0
+        return func
+
+    if photon_selection == 'overlapZGamma':
+        def func(g):
+            return \
+                g["pt"]                 > 15 \
+                and abs(g["eta"])       < 2.6
+        return func
+
+    if photon_selection is None:
+        def func(l):
+            return \
+                l["pt"]                 > 13 \
+                and abs(l["eta"])       < 2.4
+        return func
 
 # Gen Particle Filter
 def filterGenElectrons( genParts ):

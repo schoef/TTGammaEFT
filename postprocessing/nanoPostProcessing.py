@@ -4,16 +4,11 @@
 import ROOT
 import sys
 import os
-import copy
-import random
 import subprocess
-import datetime
 import shutil
 import uuid
 
-from array import array
-from operator import mul
-from math import sqrt, atan2, sin, cos, cosh, isnan
+from math import sqrt
 
 # RootTools
 from RootTools.core.standard import *
@@ -24,14 +19,15 @@ import TTGammaEFT.Tools.user as user
 # Tools for systematics
 from TTGammaEFT.Tools.helpers                    import checkRootFile, deltaR, deltaPhi, bestDRMatchInCollection
 
-from TTGammaEFT.Tools.objectSelection            import particlePtEtaSelection, jetLeptonCleaning
+from TTGammaEFT.Tools.objectSelection            import particlePtEtaSelection, jetCleaning
 from TTGammaEFT.Tools.objectSelection            import getLeptons, getGoodLeptons, getSortedParticles, getSortedParticles, getGoodParticles
 from TTGammaEFT.Tools.objectSelection            import filterBJets, filterGenElectrons, filterGenMuons, filterGenPhotons, filterGenTops, filterGenBJets 
 from TTGammaEFT.Tools.objectSelection            import jetSelector, muonSelector, eleSelector, photonSelector, genJetSelector, genLeptonSelector, genPhotonSelector
-from TTGammaEFT.Tools.objectSelection            import nanoElectronVars, nanoMuonVars, nanoTauVars, nanoPhotonVars, nanoJetVars, nanoGenVars, nanoGenJetVars
-from TTGammaEFT.Tools.objectSelection            import nanoElectronVarString, nanoMuonVarString, nanoTauVarString, nanoPhotonVarString, nanoJetVarString, nanoGenVarString, nanoBJetVars, nanoBJetVarString, nanoGenJetVarString
+from TTGammaEFT.Tools.objectSelection            import nanoElectronVars, nanoMuonVars, nanoLeptonVars, nanoTauVars, nanoPhotonVars, nanoJetVars, nanoGenVars, nanoGenJetVars
+from TTGammaEFT.Tools.objectSelection            import nanoElectronVarString, nanoMuonVarString, nanoLeptonVarString, nanoTauVarString, nanoPhotonVarString, nanoJetVarString, nanoGenVarString, nanoBJetVars, nanoBJetVarString, nanoGenJetVarString
+from TTGammaEFT.Tools.objectSelection            import defaultValue
 
-from TTGammaEFT.Tools.overlapRemovalTTG          import hasMesonMother, getParentIds, isTTGammaPhoton, isZGammaPhoton, isIsolatedPhoton, getPhotonCategory
+from TTGammaEFT.Tools.overlapRemovalTTG          import hasMesonMother, getParentIds, isIsolatedPhoton, getPhotonCategory
 
 from TTGammaEFT.Tools.WeightInfo                 import WeightInfo
 from TTGammaEFT.Tools.HyperPoly                  import HyperPoly
@@ -111,13 +107,13 @@ skimConds = ["(1)"]
 #    skimConds.append( "Sum$(LepGood_pt>10&&abs(LepGood_eta)<2.4) + Sum$(LepOther_pt>10&&abs(LepOther_eta)<2.5)>=2" )
 
 # Trigger selection
-from TTGammaEFT.Tools.triggerSelector import triggerSelector
-ts           = triggerSelector(options.year)
-triggerCond  = ts.getSelection(options.samples[0] if isData else "MC")
-treeFormulas = {"triggerDecision": {'string':triggerCond} }
-if isData and options.triggerSelection:
-    logger.info("Sample will have the following trigger skim: %s"%triggerCond)
-    skimConds.append( triggerCond )
+#from TTGammaEFT.Tools.triggerSelector import triggerSelector
+#ts           = triggerSelector(options.year)
+#triggerCond  = ts.getSelection(options.samples[0] if isData else "MC")
+treeFormulas = {}#"triggerDecision": {'string':triggerCond} }
+#if isData and options.triggerSelection:
+#    logger.info("Sample will have the following trigger skim: %s"%triggerCond)
+#    skimConds.append( triggerCond )
 
 #Samples: combine if more than one
 if len(samples)>1:
@@ -265,14 +261,18 @@ if options.addReweights and isMC:
 new_variables  = reweight_variables
 new_variables += [ 'weight/F', 'ref_weight/F', 'triggerDecision/I', 'isData/I']
 new_variables += [ 'ht/F', 'metSig/F' ]
-new_variables += [ 'nJet/I', 'nAllJets/I', 'nBTag/I']
-new_variables += [ 'nLep/I', 'nMuon/I', 'nElectron/I', 'nLepTight/I', 'nLepVeto/I']
+new_variables += [ 'nAllJet/I', 'nBTag/I']
+new_variables += [ 'nLeptonTight/I', 'nLeptonVeto/I']
+new_variables += [ 'nElectron/I', 'nMuon/I']
 new_variables += [ 'photonJetdR/F', 'photonLepdR/F' ] 
-new_variables += [ 'met_pt_photonEstimated/F', 'met_phi_photonEstimated/F', 'metSig_photonEstimated/F' ]
-new_variables += [ 'nPhoton/I' ] 
+new_variables += [ 'MET_pt_photonEstimated/F', 'MET_phi_photonEstimated/F', 'METSig_photonEstimated/F' ]
+new_variables += [ 'nJet/I' ] 
 new_variables += [ 'Jet[%s]'      %nanoJetVarString ]
-new_variables += [ 'Electron[%s]' %nanoElectronVarString ]
-new_variables += [ 'Muon[%s]'     %nanoMuonVarString ]
+#new_variables += [ 'Electron[%s]' %nanoElectronVarString ]
+#new_variables += [ 'Muon[%s]'     %nanoMuonVarString ]
+new_variables += [ 'nLepton/I' ] 
+new_variables += [ 'Lepton[%s]'     %nanoLeptonVarString ]
+new_variables += [ 'nPhoton/I' ] 
 new_variables += [ 'Photon[%s]'   %(nanoPhotonVarString + ',photonCat/I') ]
 new_variables += [ 'mll/F', 'mllgamma/F' ] 
 new_variables += [ 'lldR/F', 'lldPhi/F' ] 
@@ -311,6 +311,12 @@ def getMetPhotonEstimated( met_pt, met_phi, photon ):
   metGamma = met + gamma
   return (metGamma.Pt(), metGamma.Phi())
 
+def addMissingVariables( coll, vars ):
+    for p in coll:
+        for var in vars:
+            if not var in p:
+                p[var] = defaultValue
+
 def addIndex( collection ):
     for i, col in enumerate(collection):
         col['index'] = i
@@ -347,7 +353,7 @@ def filler( event ):
     if isMC:
 
         # weight
-        event.weight = lumiScaleFactor*r.genWeight if lumiScaleFactor is not None else 0
+        event.weight = lumiScaleFactor*r.genWeight if lumiScaleFactor is not None else defaultValue
 
         # GEN Particles
         gPart = getSortedParticles(r, collVars=nanoGenVars, coll="GenPart")
@@ -364,8 +370,8 @@ def filler( event ):
 
         # Overlap removal flags for ttgamma/ttbar and Zgamma/DY
         GenIsoPhoton    =      filter( lambda g: isIsolatedPhoton( g, gPart, 0.2 ), GenPhoton )
-        event.isTTGamma = len( filter( lambda g: isTTGammaPhoton(  g ),             GenIsoPhoton ) ) > 0 
-        event.isZGamma  = len( filter( lambda g: isZGammaPhoton(   g ),             GenIsoPhoton ) ) > 0 
+        event.isTTGamma = len( getGoodParticles( genPhotonSelector( 'overlapTTGamma' ), GenIsoPhoton ) ) > 0 
+        event.isZGamma  = len( getGoodParticles( genPhotonSelector( 'overlapZGamma' ),  GenIsoPhoton ) ) > 0 
 
         # Store
         if len(GenElectron) > 0: fill_vector_collection( event, "GenElectron", nanoGenVars,    GenElectron )
@@ -431,27 +437,34 @@ def filler( event ):
     looseLeptons = getGoodLeptons(r, eleSelector( "loose" ),     muonSelector( "loose" ),     eleCollVars=nanoElectronVars, eleColl="Electron", muonCollVars=nanoMuonVars, muonColl="Muon")
     tightLeptons = getGoodLeptons(r, eleSelector( "tight" ),     muonSelector( "tight" ),     eleCollVars=nanoElectronVars, eleColl="Electron", muonCollVars=nanoMuonVars, muonColl="Muon")
     vetoLeptons  = getGoodLeptons(r, eleSelector( "thirdVeto" ), muonSelector( "thirdVeto" ), eleCollVars=nanoElectronVars, eleColl="Electron", muonCollVars=nanoMuonVars, muonColl="Muon")
+
     addIndex( looseLeptons )
+    addMissingVariables( looseLeptons, nanoLeptonVars )
 
     looseElectrons  = filter( lambda l:abs(l['pdgId'])==11, looseLeptons)
     looseMuons      = filter( lambda l:abs(l['pdgId'])==13, looseLeptons)
 
     # Store lepton number
-    event.nLep       = len(looseLeptons)
-    event.nLepTight  = len(tightLeptons)
-    event.nLepVeto   = len(vetoLeptons)         
-    event.nElectrons = len(looseElectrons)
-    event.nMuons     = len(looseMuons)
+    event.nLepton       = len(looseLeptons)
+    event.nLeptonTight  = len(tightLeptons)
+    event.nLeptonVeto   = len(vetoLeptons)         
+    event.nElectron     = len(looseElectrons)
+    event.nMuon         = len(looseMuons)
 
-    fill_vector_collection( event, "Electron", nanoElectronVars, looseElectrons )
-    fill_vector_collection( event, "Muon",     nanoMuonVars,     looseMuons )
+    fill_vector_collection( event, "Lepton", nanoLeptonVars, looseLeptons )
+#    fill_vector_collection( event, "Electron", nanoElectronVars, looseElectrons )
+#    fill_vector_collection( event, "Muon",     nanoMuonVars,     looseMuons )
 
-    # Jets and lepton jet cross-cleaning.
+    # Photons
+    allPhotons     = getSortedParticles( r, nanoPhotonVars, coll="Photon" )
+    photons        = getGoodParticles( photonSelector( 'loose' ), allPhotons )
+    addIndex( photons )
+
+    # Jets
     allJets  = getSortedParticles(r, collVars=nanoJetVars, coll="Jet")
-#    allJets  = getAllJets(r, collVars = nanoJetVars, coll="Jet")
     goodJets = getGoodParticles( jetSelector(), allJets )
-#    goodJets = particlePtEtaSelection( allJets, ptCut = 30, absEtaCut = 2.4 )
-    goodJets = jetLeptonCleaning( goodJets, looseLeptons, dRCut = 0.4 )
+    goodJets = jetCleaning( goodJets, looseLeptons, dRCut = 0.4 )
+    goodJets = jetCleaning( goodJets, photons, dRCut = 0.1 )
     addIndex( goodJets )
 
     # Store jets
@@ -470,12 +483,6 @@ def filler( event ):
 
     event.nBTag = len(bJetsDeepCSV)
 
-    # Photons
-    allPhotons     = getSortedParticles( r, nanoPhotonVars, coll="Photon" )
-    photons        = getGoodParticles( photonSelector( 'loose' ), allPhotons )
-#    photons        = getGoodPhotons(r, photon_selector, collVars=nanoPhotonVars, coll="Photon")
-    addIndex( photons )
-
     # Store photons
     if len(photons) > 0:
         # match photon with gen-particle and get its photon category -> reco Photon categorization
@@ -486,8 +493,8 @@ def filler( event ):
         fill_vector_collection( event, "Photon", nanoPhotonVars + ['photonCat'], photons )
 
         # additional observables
-        event.met_pt_photonEstimated, event.met_phi_photonEstimated = getMetPhotonEstimated( r.MET_pt, r.MET_phi, photons[0] )
-        if event.ht > 0:          event.metSig_photonEstimated      = event.met_pt_photonEstimated / sqrt( event.ht )
+        event.MET_pt_photonEstimated, event.MET_phi_photonEstimated = getMetPhotonEstimated( r.MET_pt, r.MET_phi, photons[0] )
+        if event.ht > 0:          event.METSig_photonEstimated      = event.MET_pt_photonEstimated / sqrt( event.ht )
         if len(goodJets) > 0:     event.photonJetdR                 = min( deltaR(photons[0], j ) for j in goodJets )
         if len(looseLeptons) > 0: event.photonLepdR                 = min( deltaR(photons[0], l ) for l in looseLeptons )
 
@@ -495,7 +502,7 @@ def filler( event ):
 
     # additional observables
     event.ht         = sum([j['pt'] for j in goodJets])
-    event.metSig     = r.MET_pt/sqrt(event.ht) if event.ht>0 else float('nan')
+    event.METSig     = r.MET_pt/sqrt(event.ht) if event.ht>0 else defaultValue
 
     if len(bJetsDeepCSV) > 1:
         event.bbdR   = deltaR( bJetsDeepCSV[0], bJetsDeepCSV[1] )
