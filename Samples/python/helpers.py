@@ -3,9 +3,7 @@
 # Imports
 from RootTools.core.Sample import Sample
 
-#
 # Helpers Functions
-#
 def singleton(class_):
   instances = {}
   def getinstance(*args, **kwargs):
