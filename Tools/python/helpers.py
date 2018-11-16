@@ -2,20 +2,20 @@
 '''
 #Standard imports
 import ROOT
-from math import pi, sqrt, cos, sin, sinh, log, cosh
-from array import array
 import itertools
-import timeit
+from math                             import sqrt
+from array                            import array
 
 # Logging
 import logging
 logger = logging.getLogger(__name__)
 
+# Constants
+from TTGammaEFT.Tools.constants       import mZ, defaultValue
+
 #scripts
 ROOT.gROOT.LoadMacro("$CMSSW_BASE/src/TTGammaEFT/Tools/scripts/tdrstyle.C")
 ROOT.setTDRStyle()
-mZ=91.1876
-#mZ = 91.2
 
 def natural_sort(list, key=lambda s:s):
     """
@@ -41,33 +41,6 @@ def getCouplingFromName(name, coupling):
         return float(l[l.index(coupling)+1].replace('p','.').replace('m','-'))
     else:
         return 0.
-
-def cosThetaStar( Z_mass, Z_pt, Z_eta, Z_phi, l_pt, l_eta, l_phi ):
-
-    Z   = ROOT.TVector3()
-    l   = ROOT.TVector3()
-    Z.SetPtEtaPhi( Z_pt, Z_eta, Z_phi )
-    l.SetPtEtaPhi( l_pt, l_eta, l_phi )
-    
-    # get cos(theta) and the lorentz factor, calculate cos(theta*)
-    cosTheta = Z*l / (sqrt(Z*Z) * sqrt(l*l))
-    gamma   = sqrt( 1 + Z_pt**2/Z_mass**2 * cosh(Z_eta)**2 )
-    beta    = sqrt( 1 - 1/gamma**2 )
-    return (-beta + cosTheta) / (1 - beta*cosTheta)
-
-def deltaPhi(phi1, phi2):
-    dphi = phi2-phi1
-    if  dphi > pi:
-        dphi -= 2.0*pi
-    if dphi <= -pi:
-        dphi += 2.0*pi
-    return abs(dphi)
-
-def deltaR2(l1, l2):
-    return deltaPhi(l1['phi'], l2['phi'])**2 + (l1['eta'] - l2['eta'])**2
-
-def deltaR(l1, l2):
-    return sqrt(deltaR2(l1,l2))
 
 def bestDRMatchInCollection(l, coll, deltaR = 0.2, deltaRelPt = 0.5 ):
     lst = []
@@ -100,15 +73,6 @@ def sum_histos( histos ):
 
     return res 
 
-# Returns (closest mass, index1, index2)
-def closestOSDLMassToMZ(leptons):
-    inds = range(len(leptons))
-    vecs = [ ROOT.TLorentzVector() for i in inds ]
-    for i, v in enumerate(vecs):
-        v.SetPtEtaPhiM(leptons[i]['pt'], leptons[i]['eta'], leptons[i]['phi'], 0.)
-    dlMasses = [((vecs[comb[0]] + vecs[comb[1]]).M(), comb[0], comb[1])  for comb in itertools.combinations(inds, 2) if leptons[comb[0]]['pdgId']*leptons[comb[1]]['pdgId'] < 0 and abs(leptons[comb[0]]['pdgId']) == abs(leptons[comb[1]]['pdgId']) ]
-    return min(dlMasses, key=lambda (m,i1,i2):abs(m-mZ)) if len(dlMasses)>0 else (float('nan'), -1, -1)
-
 def getSortedZCandidates(leptons):
     inds = range(len(leptons))
     vecs = [ ROOT.TLorentzVector() for i in inds ]
@@ -124,30 +88,6 @@ def getSortedZCandidates(leptons):
             usedIndices += m[1:3]
             bestCandidates.append(m)
     return bestCandidates
-
-def getMinDLMass(leptons):
-    inds = range(len(leptons))
-    vecs = [ ROOT.TLorentzVector() for i in inds ]
-    for i, v in enumerate(vecs):
-        v.SetPtEtaPhiM(leptons[i]['pt'], leptons[i]['eta'], leptons[i]['phi'], 0.)
-    dlMasses = [((vecs[comb[0]] + vecs[comb[1]]).M(), comb[0], comb[1])  for comb in itertools.combinations(inds, 2) ]
-    return min(dlMasses), dlMasses
-
-def m3( jets ):
-    if not len(jets)>=3: return float('nan'), -1, -1, -1
-    vecs = [(i, ROOT.TLorentzVector()) for i in range(len(jets))]
-    for i, v in enumerate(vecs):
-        v[1].SetPtEtaPhiM(jets[i]['pt'], jets[i]['eta'], jets[i]['phi'], 0.)
-    maxSumPt = 0
-    m3 = float('nan')
-    i1, i2, i3 = -1, -1, -1
-    for j3_comb in itertools.combinations(vecs, 3):
-        vecSum = sum( [v[1] for v in j3_comb], ROOT.TLorentzVector())
-        if vecSum.Pt()>maxSumPt:
-            maxSumPt = vecSum.Pt()
-            m3 = vecSum.M()
-            i1, i2, i3 =  [v[0] for v in j3_comb]
-    return m3, i1, i2, i3
 
 def getChain(sampleList, histname='', maxN=-1, treeName="Events"):
     if not type(sampleList)==type([]):
@@ -262,13 +202,13 @@ def getVarValue(c, var, n=-1):
     try:
         att = getattr(c, var)
     except AttributeError:
-        return float('nan')
+        return defaultValue
     if n>=0:
 #    print "getVarValue %s %i"%(var,n)
         if n<att.__len__():
             return att[n]
         else:
-            return float('nan')
+            return defaultValue
     return att
 
 def getEList(chain, cut, newname='eListTMP'):
@@ -344,27 +284,6 @@ def getPlotFromChain(c, var, binning, cutString = "(1)", weight = "weight", binn
         res.SetBinError(1 , sqrt(res.GetBinError(0)**2 + res.GetBinError(1)**2))
     return res
 
-def getGenZ(genparts):
-  for g in genparts:
-    if g['pdgId'] != 23:        continue					# pdgId == 23 for Z
-    if g['status'] != 62:	continue					# status 62 is last gencopy before it decays into ll/nunu
-    return g
-  return None
-
-def getGenPhoton(genparts):
-  for g in genparts:								# Type 0: no photon
-    if g['pdgId'] != 22:        continue					# pdgId == 22 for photons
-    if g['status'] != 23:	continue					# for photons, take status 23
-    return g
-  return None
-
-def getGenB(genparts):
-    for g in genparts:
-        if abs(g['pdgId']) != 5:        continue
-        if g['status'] != 23:   continue
-        return g
-    return None
-
 def timeit(method):
     import time
     def timed(*args, **kw):
@@ -410,5 +329,4 @@ class memoized(object):
    def __get__(self, obj, objtype):
       '''Support instance methods.'''
       return functools.partial(self.__call__, obj)
-
 
