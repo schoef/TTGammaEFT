@@ -8,16 +8,17 @@ import subprocess
 import shutil
 import uuid
 
-from math import sqrt
+from math                                        import sqrt
 
 # RootTools
-from RootTools.core.standard import *
+from RootTools.core.standard                     import *
 
 # User specific
 import TTGammaEFT.Tools.user as user
 
 # Tools for systematics
-from TTGammaEFT.Tools.helpers                    import checkRootFile, deltaR, deltaPhi, bestDRMatchInCollection
+from TTGammaEFT.Tools.helpers                    import checkRootFile, bestDRMatchInCollection
+from TTGammaEFT.Tools.observables                import deltaR, deltaPhi, m3
 
 from TTGammaEFT.Tools.objectSelection            import particlePtEtaSelection, jetCleaning
 from TTGammaEFT.Tools.objectSelection            import getLeptons, getGoodLeptons, getSortedParticles, getSortedParticles, getGoodParticles
@@ -25,7 +26,8 @@ from TTGammaEFT.Tools.objectSelection            import filterBJets, filterGenEl
 from TTGammaEFT.Tools.objectSelection            import jetSelector, muonSelector, eleSelector, photonSelector, genJetSelector, genLeptonSelector, genPhotonSelector
 from TTGammaEFT.Tools.objectSelection            import nanoElectronVars, nanoMuonVars, nanoLeptonVars, nanoTauVars, nanoPhotonVars, nanoJetVars, nanoGenVars, nanoGenJetVars
 from TTGammaEFT.Tools.objectSelection            import nanoElectronVarString, nanoMuonVarString, nanoLeptonVarString, nanoTauVarString, nanoPhotonVarString, nanoJetVarString, nanoGenVarString, nanoBJetVars, nanoBJetVarString, nanoGenJetVarString
-from TTGammaEFT.Tools.objectSelection            import defaultValue
+
+from TTGammaEFT.Tools.constants                  import defaultValue
 
 from TTGammaEFT.Tools.overlapRemovalTTG          import hasMesonMother, getParentIds, isIsolatedPhoton, getPhotonCategory
 
@@ -46,15 +48,14 @@ def get_parser():
     argParser.add_argument('--logLevel',                    action='store',         nargs='?',              choices=logChoices,     default='INFO',                     help="Log level for logging")
     argParser.add_argument('--overwrite',                   action='store_true',                                                                                        help="Overwrite existing output files, bool flag set to True  if used")
     argParser.add_argument('--samples',                     action='store',         nargs='*',  type=str,                           default=['WZTo3LNu'],               help="List of samples to be post-processed, given as CMG component name")
-    argParser.add_argument('--eventsPerJob',                action='store',         nargs='?',  type=int,                           default=300000000,                   help="Maximum number of events per job (Approximate!).") # mul by 100
+    argParser.add_argument('--eventsPerJob',                action='store',         nargs='?',  type=int,                           default=300000000,                  help="Maximum number of events per job (Approximate!).") # mul by 100
     argParser.add_argument('--nJobs',                       action='store',         nargs='?',  type=int,                           default=1,                          help="Maximum number of simultaneous jobs.")
     argParser.add_argument('--job',                         action='store',                     type=int,                           default=0,                          help="Run only job i")
     argParser.add_argument('--minNJobs',                    action='store',         nargs='?',  type=int,                           default=1,                          help="Minimum number of simultaneous jobs.")
     argParser.add_argument('--fileBasedSplitting',          action='store_true',                                                                                        help="Split njobs according to files")
-    argParser.add_argument('--dataDir',                     action='store',         nargs='?',  type=str,                           default="/a/b/c",                   help="Name of the directory where the input data is stored (for samples read from Heppy).")
-    argParser.add_argument('--targetDir',                   action='store',         nargs='?',  type=str,                           default=user.nanopostprocessing_output_directory, help="Name of the directory the post-processed files will be saved")
-    argParser.add_argument('--processingEra',               action='store',         nargs='?',  type=str,                           default='TTGammaEFT_PP_v4',             help="Name of the processing era")
-    argParser.add_argument('--skim',                        action='store',         nargs='?',  type=str,                           default='dilepTiny',                help="Skim conditions to be applied for post-processing")
+    argParser.add_argument('--targetDir',                   action='store',         nargs='?',  type=str,                           default=user.postprocessing_output_directory, help="Name of the directory the post-processed files will be saved")
+    argParser.add_argument('--processingEra',               action='store',         nargs='?',  type=str,                           default='TTGammaEFT_PP_v1',         help="Name of the processing era")
+    argParser.add_argument('--skim',                        action='store',         nargs='?',  type=str,                           default='dilep',                    help="Skim conditions to be applied for post-processing")
     argParser.add_argument('--sync',                        action='store_true',                                                                                        help="Run syncing.")
     argParser.add_argument('--small',                       action='store_true',                                                                                        help="Run the file on a small sample (for test purpose), bool flag set to True if used")
     argParser.add_argument('--year',                        action='store',                     type=int,   choices=[2016,2017],    required = True,                    help="Which year?")
@@ -64,6 +65,11 @@ def get_parser():
     return argParser
 
 options = get_parser().parse_args()
+
+# B-Tagger
+#tagger = 'DeepCSV'
+tagger = 'CSVv2'
+
 
 # Logging
 import TTGammaEFT.Tools.logger as logger
@@ -102,7 +108,7 @@ assert isMC or len(samples)==1, "Don't concatenate data samples"
 
 skimConds = ["(1)"]
 #if isSingleLep:
-#    skimConds.append( "Sum$(LepGood_pt>20&&abs(LepGood_eta)<2.4) + Sum$(LepOther_pt>20&&abs(LepOther_eta)<2.5)>=1" )
+#    skimConds.append( "Sum$(Electron_pt>20&&abs(Electron_eta)<2.5) + Sum$(LepOther_pt>20&&abs(LepOther_eta)<2.5)>=1" )
 #elif isDiLep:
 #    skimConds.append( "Sum$(LepGood_pt>10&&abs(LepGood_eta)<2.4) + Sum$(LepOther_pt>10&&abs(LepOther_eta)<2.5)>=2" )
 
@@ -177,7 +183,7 @@ branchKeepStrings_MC = [\
 ]
 
 #branches to be kept for data only
-branchKeepStrings_DATA = [ ]
+branchKeepStrings_DATA = []
 
 # Branches to be kept for data and MC
 # Electron variables to be read from chain
@@ -260,7 +266,7 @@ if options.addReweights and isMC:
 # Write Variables
 new_variables  = reweight_variables
 new_variables += [ 'weight/F', 'ref_weight/F', 'triggerDecision/I', 'isData/I']
-new_variables += [ 'ht/F', 'metSig/F' ]
+new_variables += [ 'ht/F', 'METSig/F' ]
 new_variables += [ 'nAllJet/I', 'nBTag/I']
 new_variables += [ 'nLeptonTight/I', 'nLeptonVeto/I']
 new_variables += [ 'nElectron/I', 'nMuon/I']
@@ -276,6 +282,7 @@ new_variables += [ 'Lepton[%s]'     %nanoLeptonVarString ]
 new_variables += [ 'nPhoton/I' ] 
 new_variables += [ 'Photon[%s]'   %(nanoPhotonVarString + ',photonCat/I') ]
 new_variables += [ 'mll/F', 'mllgamma/F' ] 
+new_variables += [ 'm3/F', 'm3wBJet/F' ] 
 new_variables += [ 'lldR/F', 'lldPhi/F' ] 
 new_variables += [ 'bbdR/F', 'bbdPhi/F' ] 
 # Selected BJets
@@ -479,14 +486,18 @@ def filler( event ):
     fill_vector_collection( event, "Jet", nanoJetVars, goodJets )
 
     # bJets
-    bJetsDeepCSV = filterBJets( goodJets, tagger = 'DeepCSV', year = options.year )
+    bJets = filterBJets( goodJets, tagger=tagger, year=options.year )
 
     # Store bJets
-    bj0, bj1 = ( list(bJetsDeepCSV) + [None, None] )[:2]
+    bj0, bj1 = ( list(bJets) + [None, None] )[:2]
     if bj0: fill_vector( event, "Bj0", nanoBJetVars, bj0 )
     if bj1: fill_vector( event, "Bj1", nanoBJetVars, bj1 )
 
-    event.nBTag = len(bJetsDeepCSV)
+    event.nBTag = len(bJets)
+
+    # Additional observables
+    event.m3      = m3( goodJets )[0]
+    event.m3wBJet = m3( goodJets, nBJets=1, tagger=tagger, year=options.year )[0]
 
     # Store photons
     if len(photons) > 0:
@@ -509,9 +520,9 @@ def filler( event ):
     event.ht         = sum([j['pt'] for j in goodJets])
     event.METSig     = r.MET_pt/sqrt(event.ht) if event.ht>0 else defaultValue
 
-    if len(bJetsDeepCSV) > 1:
-        event.bbdR   = deltaR( bJetsDeepCSV[0], bJetsDeepCSV[1] )
-        event.bbdPhi = deltaPhi( bJetsDeepCSV[0]['phi'], bJetsDeepCSV[1]['phi'] )
+    if len(bJets) > 1:
+        event.bbdR   = deltaR( bJets[0], bJets[1] )
+        event.bbdPhi = deltaPhi( bJets[0]['phi'], bJets[1]['phi'] )
 
     if len(looseLeptons) > 1:
         event.lldR     = deltaR( looseLeptons[0], looseLeptons[1] )
