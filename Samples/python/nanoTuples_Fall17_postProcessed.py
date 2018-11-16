@@ -9,32 +9,37 @@ from RootTools.core.Sample import Sample
 import logging
 logger = logging.getLogger(__name__)
 
+# Colors
 from TTGammaEFT.Samples.color import color
 
-# Data directories
-from TTGammaEFT.Tools.user import postProcessing_directory
-subDirectory = "TopEFT_PP_2017_TTG_v1/dilep/"
+# Data directory
+try:    data_directory = sys.modules['__main__'].data_directory
+except: from TTGammaEFT.Tools.user import data_directory
 
-logger.info( "Loading MC samples from directory %s", os.path.join( postProcessing_directory, subDirectory ) )
+# Take post processing directory if defined in main module
+try:    postprocessing_directory = sys.modules['__main__'].postprocessing_directory
+except: from TTGammaEFT.Tools.user import postprocessing_directory
+
+logger.info( "Loading MC samples from directory %s", os.path.join( data_directory, postprocessing_directory ) )
 
 DY_M5to50_HT = [
-#                "DYJetsToLL_M5to50_LO_lheHT70", 
-#                "DYJetsToLL_M4to50_HT70to100",
-#                "DYJetsToLL_M4to50_HT100to200",
-#                "DYJetsToLL_M4to50_HT200to400_comb",
-#                "DYJetsToLL_M4to50_HT400to600",
-#                "DYJetsToLL_M4to50_HT600toInf"
+                "DYJetsToLL_M5to50_LO_lheHT70", 
+                "DYJetsToLL_M4to50_HT70to100",
+                "DYJetsToLL_M4to50_HT100to200",
+                "DYJetsToLL_M4to50_HT200to400_comb",
+                "DYJetsToLL_M4to50_HT400to600",
+                "DYJetsToLL_M4to50_HT600toInf"
                 ] 
 
 DY_M50_HT =[
-#            "DYJetsToLL_M50_LO_ext1_lheHT100", 
-#            "DYJetsToLL_M50_HT100to200_comb",
-#            "DYJetsToLL_M50_HT200to400_comb",
-#            "DYJetsToLL_M50_HT400to600_comb",
-#            "DYJetsToLL_M50_HT600to800",
-#            "DYJetsToLL_M50_HT800to1200",
-#            "DYJetsToLL_M50_HT1200to2500",
-#            "DYJetsToLL_M50_HT2500toInf"
+            "DYJetsToLL_M50_LO_ext1_lheHT100", 
+            "DYJetsToLL_M50_HT100to200_comb",
+            "DYJetsToLL_M50_HT200to400_comb",
+            "DYJetsToLL_M50_HT400to600_comb",
+            "DYJetsToLL_M50_HT600to800",
+            "DYJetsToLL_M50_HT800to1200",
+            "DYJetsToLL_M50_HT1200to2500",
+            "DYJetsToLL_M50_HT2500toInf"
             ] 
 
 
@@ -93,7 +98,7 @@ dirs['multiBoson']       = dirs['diBosonInclusive'] #+ dirs['triBoson']
 #dirs['ZGJets']       = ["ZGJets"]
 #dirs['ZG']           = dirs['ZGTo2LG'] + dirs['ZGJets']
 
-directories = { key : [ os.path.join( postProcessing_directory, subDirectory, dir) for dir in dirs[key]] for key in dirs.keys()}
+directories = { key : [ os.path.join( data_directory, postprocessing_directory, dir) for dir in dirs[key]] for key in dirs.keys()}
 
 #DY              = Sample.fromDirectory(name="DY",               treeName="Events", isData=False, color=color.DY,              texName="DY",                                directory=directories['DY'])
 DY_LO_17          = Sample.fromDirectory(name="DY_LO",            treeName="Events", isData=False, color=color.DY,              texName="DY (LO)",                           directory=directories['DY_LO'])
