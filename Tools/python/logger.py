@@ -1,5 +1,6 @@
 import logging
 import sys
+
 def get_logger(logLevel, logFile = None, add_sync_level = False):
     ''' Logger for EFT  module.
     '''

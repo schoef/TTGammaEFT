@@ -1,9 +1,3 @@
-# Standard imports
-import numbers
-from math import *
-
-# TTGammaEFT
-from TTGammaEFT.Tools.helpers import getVarValue, getObjDict, deltaR
 
 nanoElectronVarString = "deltaEtaSC/F,dr03EcalRecHitSumEt/F,dr03HcalDepth1TowerSumEt/F,dr03TkSumPt/F,dxy/F,dxyErr/F,dz/F,dzErr/F,eCorr/F,eInvMinusPInv/F,energyErr/F,eta/F,hoe/F,ip3d/F,mass/F,miniPFRelIso_all/F,miniPFRelIso_chg/F,pfRelIso03_all/F,pfRelIso03_chg/F,phi/F,pt/F,r9/F,sieie/F,sip3d/F,mvaTTH/F,charge/F,cutBased/F,jetIdx/I,pdgId/I,photonIdx/I,tightCharge/I,vidNestedWPBitmap/I,convVeto/I,cutBased_HEEP/I,isPFcand/I,lostHits/I,genPartIdx/I,genPartFlav/I,cleanmask/I"
 nanoMuonVarString     = "dxy/F,dxyErr/F,dz/F,dzErr/F,eta/F,mass/F,dxy/F,miniPFRelIso_all/F,miniPFRelIso_chg/F,pfRelIso03_all/F,pfRelIso03_chg/F,pfRelIso04_all/F,phi/F,pt/F,ptErr/F,segmentComp/F,sip3d/F,mvaTTH/F,charge/I,jetIdx/I,nStations/I,nTrackerLayers/I,pdgId/I,tightCharge/I,highPtId/I,isPFcand/I,mediumId/I,softId/I,tightId/I,genPartIdx/I,genPartFlav/I,cleanmask/I"
@@ -26,7 +20,6 @@ nanoGenVars      = [item.split('/')[0] for item in nanoGenVarString.split(',')]
 nanoGenJetVars   = [item.split('/')[0] for item in nanoGenJetVarString.split(',')]
 
 idCutBased       = {'loose':1 ,'medium':2, 'tight':3}
-defaultValue     = -999
 
 # General Selection Functions
 def particlePtEtaSelection( collection, ptCut=10, absEtaCut=2.4 ):
@@ -35,6 +28,9 @@ def particlePtEtaSelection( collection, ptCut=10, absEtaCut=2.4 ):
     return parts
 
 def jetCleaning( jets, otherParticles, dRCut = 0.4 ):
+
+    from TTGammaEFT.Tools.observables   import deltaR
+
     res = []
     for jet in jets:
         clean = True
@@ -48,6 +44,7 @@ def jetCleaning( jets, otherParticles, dRCut = 0.4 ):
     return res
 
 def getUnsortedParticles( c, collVars, coll ):
+    from TTGammaEFT.Tools.helpers           import getVarValue, getObjDict
     return [getObjDict(c, coll+'_', collVars, i) for i in range(int(getVarValue(c, 'n'+coll)))]
 
 def getSortedParticles( c, collVars, coll ):
@@ -63,7 +60,7 @@ def getGoodParticles( selector, coll ):
 def isGoodParticle( p, ptCut=10, absEtaCut=2.4 ):
     return p['pt']>ptCut and abs(p['eta'])<absEtaCut
 
-# Get Reco Leptons
+# Reco Leptons
 def getLeptons(c, eleCollVars=nanoElectronVars, eleColl="Electron", muonCollVars=nanoMuonVars, muonColl="Muon"):
     leptons  = getSortedParticles( c, eleCollVars,  eleColl  )
     leptons += getSortedParticles( c, muonCollVars, muonColl )
@@ -79,23 +76,21 @@ def getGoodLeptons(c, eleSelector, muonSelector, eleCollVars=nanoElectronVars, e
 # Reco b-Jet Filter
 def isBJet(j, tagger = 'DeepCSV', year = 2016):
     if tagger == 'CSVv2':
-        jetVar = 'btagCSVV2'# if nanoAOD else 'btagCSV'
         if year == 2016:
             # https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation80XReReco
-            return j[jetVar] > 0.8484 
+            return j['btagCSVV2'] > 0.8484 
         elif year == 2017:
             # https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation94X
-            return j[jetVar] > 0.8838 
+            return j['btagCSVV2'] > 0.8838 
         else:
             raise (NotImplementedError, "Don't know what cut to use for year %s"%year)
     elif tagger == 'DeepCSV':
-        jetVar = 'btagDeepB'# if nanoAOD else 'btagDeepCSV'
         if year == 2016:
             # https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation80XReReco
-            return j[jetVar] > 0.6324
+            return j['btagDeepB'] > 0.6324
         elif year == 2017:
             # https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation94X
-            return j[jetVar] > 0.4941
+            return j['btagDeepB'] > 0.4941
         else:
             raise (NotImplementedError, "Don't know what cut to use for year %s"%year)
 
@@ -106,6 +101,7 @@ def filterBJets( jets, tagger = 'DeepCSV', year = 2016 ):
 
 # Reco Selectors
 def jetSelector():
+    # According to AN-2017/197
     # hadron multiplicity > 0 still missing
     def func(l):
         return \
@@ -231,6 +227,7 @@ def photonSelector( photon_selection ):
 
 # Gen Selectors
 def genJetSelector():
+    # According to AN-2017/197
     def func(l):
         return \
             l["pt"]                 > 30 \
@@ -238,6 +235,7 @@ def genJetSelector():
     return func
 
 def genLeptonSelector():
+    # According to AN-2017/197
     def func(l):
         return \
             l["pt"]                 > 15 \
@@ -245,6 +243,7 @@ def genLeptonSelector():
     return func
 
 def genPhotonSelector( photon_selection = None ):
+    # According to AN-2017/197
     if photon_selection == 'overlapTTGamma':
         def func(g):
             return \
@@ -298,4 +297,22 @@ def filterGenBJets( genJets ):
 # 71: copied partons to collect into contiguous colour singlet (jets)
 #  1: stage of event generation inside PYTHIA (last particle, even after 23)
 # 22: intermediate (intended to have preserved mass) (tops)
+
+# check for nanoAOD
+def getFilterCut( isData=False, isFastSim=False, year=2016):
+    if isFastSim:
+        filters = [ "Flag_goodVertices" ]
+    elif year == 2016:
+        filters             = [ "Flag_goodVertices", "Flag_HBHENoiseIsoFilter", "Flag_HBHENoiseFilter" ]
+        filters            += [ "Flag_globalTightHalo2016Filter", "Flag_EcalDeadCellTriggerPrimitiveFilter" ]
+        filters            += [ "Flag_badChargedHadronSummer2016", "Flag_badMuonSummer2016" ]
+    elif year == 2017:
+        filters             = [ "Flag_goodVertices", "Flag_globalTightHalo2016Filter" ]
+        filters            += [ "Flag_HBHENoiseFilter", "Flag_HBHENoiseIsoFilter" ]
+        filters            += [ "Flag_EcalDeadCellTriggerPrimitiveFilter", "Flag_BadPFMuonFilter", "Flag_BadChargedCandidateFilter", "Flag_ecalBadCalibFilter" ]
+        if isData: filters += [ "Flag_eeBadScFilter" ]
+    if isData: filters += [ "weight>0" ]
+#    return "&&".join(filters)
+    return "(1)"
+
 

@@ -1,5 +1,5 @@
 from TTGammaEFT.Tools.objectSelection import isGoodParticle
-from TTGammaEFT.Tools.helpers import deltaR
+from TTGammaEFT.Tools.observables     import deltaR
 
 def isIsolatedPhoton( g, genparts, coneSize ):
     for other in genparts:

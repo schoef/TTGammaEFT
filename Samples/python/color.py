@@ -1,6 +1,6 @@
 import ROOT
 
-from TTGammaEFT.samples.helpers import singleton as singleton
+from TTGammaEFT.Samples.helpers import singleton as singleton
 
 @singleton
 class color():
