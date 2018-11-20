@@ -97,7 +97,7 @@ def m3( jets, nBJets=0, tagger='DeepCSV', year=2016 ):
     for j3_comb in itertools.combinations(vecs, 3):
         if nBJets > 0:
             nBs = sum( [ isBJet( jets[v[0]], tagger=tagger, year=year ) for v in j3_comb ] )
-            if nBs < nBJets: continue
+            if nBs != nBJets: continue
 
         vecSum = sum( [ v[1] for v in j3_comb ], ROOT.TLorentzVector() )
         if vecSum.Pt() > maxSumPt:

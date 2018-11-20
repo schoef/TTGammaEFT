@@ -1,11 +1,11 @@
 from TTGammaEFT.Tools.objectSelection import isGoodParticle
 from TTGammaEFT.Tools.observables     import deltaR
 
-def isIsolatedPhoton( g, genparts, coneSize ):
+def isIsolatedPhoton( g, genparts, coneSize=0.2, ptCut=5 ):
     for other in genparts:
       if other['pdgId'] == 22:          continue   # Avoid photon or generator copies of it
       if other['status'] < 0:           continue   # Only final state particles
-      if other['pt'] < 5:               continue   # pt > 5
+      if other['pt'] < ptCut:           continue   # pt > 5
       if deltaR( g, other ) > coneSize: continue   # check deltaR
       return False
     return True
