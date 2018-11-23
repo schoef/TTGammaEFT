@@ -3,11 +3,22 @@ from TTGammaEFT.Tools.observables     import deltaR
 
 def isIsolatedPhoton( g, genparts, coneSize=0.2, ptCut=5 ):
     for other in genparts:
-      if other['pdgId'] == 22:          continue   # Avoid photon or generator copies of it
-      if other['status'] < 0:           continue   # Only final state particles
-      if other['pt'] < ptCut:           continue   # pt > 5
-      if deltaR( g, other ) > coneSize: continue   # check deltaR
-      return False
+        if other['pdgId']    == 22:       continue   # Avoid photon or generator copies of it
+        if other['status']    < 0:        continue   # Only final state particles
+        if other['pt']        < ptCut:    continue   # pt > 5
+        if deltaR( g, other ) > coneSize: continue   # check deltaR
+        return False
+    return True
+
+def isIsolatedPhotonPrint( g, genparts, coneSize=0.2, ptCut=5 ):
+    for other in genparts:
+        if other['pdgId']    == 22:       continue
+        if other['status']    < 0:        continue
+        if other['pt']        < ptCut:    continue
+        if deltaR( g, other ) > coneSize: continue
+        print 'not isolated, deltaR = ', deltaR( g, other )
+        print 'closest gen particle: ', other
+        return False
     return True
 
 # Categories for overlap removal (moved to object selection genPhotonSelector
@@ -30,6 +41,7 @@ def getParentIds( g, genParticles ):
   if g['genPartIdxMother'] > 0:
     try:
         mother1 = genParticles[g['genPartIdxMother']]
+#        if not mother['pdgId'] == g['pdgId']:
         parents += [mother1['pdgId']] + getParentIds( mother1, genParticles )
     except:
         # when no 'status' selection is made for g, this can run in a kind of endless-loop, then python throws an Exception
@@ -38,7 +50,7 @@ def getParentIds( g, genParticles ):
 
 def hasMesonMother( parentList ):
     parentList = map( abs, set(parentList) )
-    return max(parentList) > 37 if len(parentList)!=0 else False
+    return max(parentList) > 37 if len(parentList) != 0 else False
 
 def getPhotonCategory( g, genparts ):
 
