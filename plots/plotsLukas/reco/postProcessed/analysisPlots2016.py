@@ -27,11 +27,11 @@ loggerChoices = ['CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG', 'TRACE', 'NOTS
 import argparse
 argParser = argparse.ArgumentParser(description = "Argument parser")
 argParser.add_argument('--logLevel',           action='store',      default='INFO', nargs='?', choices=loggerChoices,                  help="Log level for logging")
-argParser.add_argument('--plot_directory',     action='store',      default='94X_TTG_v2')
-argParser.add_argument('--selection',          action='store',      default='dilep-pTG20-nPhoton1p-nJet3p-nBTag1p')
+argParser.add_argument('--plot_directory',     action='store',      default='80X_TTG_v1')
+argParser.add_argument('--selection',          action='store',      default='dilepOS-nLepVeto2-pTG20-nPhoton1p-offZSF-mll40')
 argParser.add_argument('--small',              action='store_true',                                                                    help='Run only on a small subset of the data?', )
 argParser.add_argument('--noData',             action='store_true', default=False,                                                     help='also plot data?')
-argParser.add_argument('--signal',             action='store',      default=None,   nargs='?', choices=[None, "ewkDM", "ttZ01j"],      help="Add signal to plot")
+argParser.add_argument('--signal',             action='store',      default=None,   nargs='?', choices=[None],                         help="Add signal to plot")
 argParser.add_argument('--onlyTTG',            action='store_true', default=False,                                                     help="Plot only ttG")
 argParser.add_argument('--normalize',          action='store_true', default=False,                                                     help="Normalize yields" )
 argParser.add_argument('--reweightPtZToSM',    action='store_true',                                                                    help='Reweight Pt(Z) to the SM for all the signals?', )
@@ -52,13 +52,9 @@ if args.reweightPtZToSM: args.plot_directory += "_reweightPtZToSM"
 
 # 2016 Samples
 #data_directory = "/afs/hephy.at/data/llechner01/TTGammaEFT/nanoTuples/"
-postprocessing_directory = "TTGammaEFT_PP_2016_TTG_v2/dilep/"
+postprocessing_directory = "TTGammaEFT_PP_2016_TTG_v1/inclusive/"
 from TTGammaEFT.Samples.nanoTuples_Summer16_postProcessed    import *
-
-if not args.noData:
-#    data_directory = "/afs/hephy.at/data/llechner01/nanoTuples/"
-    postprocessing_directory = "TTGammaEFT_PP_2016_TTG_v1/dilep/"
-    from TTGammaEFT.Samples.nanoTuples_Data25ns_xxx_postProcessed import *
+if not args.noData: from TTGammaEFT.Samples.nanoTuples_Run2016_05Feb2018_postProcessed import *
 
 # Text on the plots
 def drawObjects( plotData, dataMCScale, lumi_scale ):
@@ -137,12 +133,13 @@ if args.reweightPtZToSM:
 # Sample definition
 if args.onlyTTG: mc = [ TTG_16 ]
 else:            mc = [ TTG_16, DY_LO_16, TT_pow_16, singleTop_16, ZGTo2LG ]
+#else:            mc = [ TTG_16, TT_pow_16]
 
 if args.noData:
     lumi_scale = 35.9
     stack      = Stack( mc )
 else:
-    data_sample = Run2016
+    data_sample                = Run2016
     data_sample.texName        = "data (legacy)"
     data_sample.name           = "data"
     data_sample.read_variables = [ "event/I", "run/I" ]
@@ -152,21 +149,21 @@ else:
 
 stack.extend( [ [s] for s in signals ] )
 
-if args.small:
-    for sample in stack.samples:
-        newLen                  = ceil( len( sample.files ) * 0.1 )
-        # Scale "--small"-plots to get similar results compared to "full event number" plots
-        sample.eventNumberScale = len( sample.files ) / newLen
-        sample.reduceFiles( to = int( newLen ) )
-
-for sample in mc + signals:
-    if sample in mc:
-        sample.style      = styles.fillStyle( sample.color )
-    sample.scale          = lumi_scale * sample.eventNumberScale if args.small else lumi_scale
+for sample in stack.samples:
+    sample.normalization = 1.
     sample.read_variables = [] # add SF
+
+    if args.small:
+        nFiles = int( ceil( len( sample.files ) * 0.1 ) )
+        sample.reduceFiles( to = nFiles )
+
+    sample.scale          = lumi_scale / sample.normalization
 #    sample.weight         = lambda event, sample: 1.
 #    sample.read_variables = ['reweightBTagCSVv2_SF/F', 'reweightBTagDeepCSV_SF/F', 'reweightPU36fb/F', 'reweightLeptonSFSyst_tight_3l/F', 'reweightLeptonTrackingSF_tight_3l/F', 'reweightTrigger_tight_3l/F', "Z_pt/F"]
 #    sample.weight         = lambda event, sample: event.reweightBTagDeepCSV_SF*event.reweightPU36fb*event.reweightLeptonSFSyst_tight_3l*event.reweightLeptonTrackingSF_tight_3l*event.reweightTrigger_tight_3l
+
+    if sample in mc:
+        sample.style      = styles.fillStyle( sample.color )
 
 weight_ = lambda event, sample: event.weight
 tr = triggerSelector( 2016 )
@@ -199,13 +196,8 @@ read_variables  = ["weight/F", "ref_weight/F",
 read_variables += [ 'Bj0_' + var for var in nanoBJetVarString.split(',') ]
 read_variables += [ 'Bj1_' + var for var in nanoBJetVarString.split(',') ]
 
-def printVar( event, sample ):
-    print sample.name, 'ttG', event.isTTGamma
-    print sample.selectionString
-
 # Sequence
 sequence = []
-#sequence = [ printVar ]
 
 # Import plots list (after setting Plot.setDefaults)
 plotListFile = os.path.join( os.path.dirname( os.path.realpath( __file__ ) ), 'plotLists', 'allPlots.py' )
@@ -214,7 +206,9 @@ plotList     = imp.load_source( "plotList", os.path.expandvars( plotListFile ) )
 # Loop over channels
 yields   = {}
 allPlots = {}
+#allModes = [ 'SF', 'all' ]
 allModes = [ 'mumu', 'mue', 'ee', 'all', 'SF' ]
+#allModes = [ 'mumu', 'mue', 'ee' ]
 
 for index, mode in enumerate( allModes ):
     yields[mode] = {}
@@ -244,6 +238,7 @@ for index, mode in enumerate( allModes ):
             h.GetXaxis().SetBinLabel( 1, "#mu#mu" )
             h.GetXaxis().SetBinLabel( 2, "#mue" )
             h.GetXaxis().SetBinLabel( 3, "ee" )
+
     if args.noData: yields[mode]["data"] = 0
 
     yields[mode]["MC"] = sum( yields[mode][s.name] for s in mc )
@@ -259,14 +254,20 @@ for index, mode in enumerate( allModes ):
 
 
 # Add plots of different channels into "all"
-#for i_plot, plot in enumerate( allPlots[allModes[0]] ):                                             # get all plots from first entry of allModes to add other modes
-#    histoList0 = list( itertools.chain.from_iterable( plot.histos ) )                               # get all histos from there
-#    for i_hi, hi in enumerate( histoList0 ):                                                        # Loop over all histos to add the yields of other modes
-#        for mode in allModes[1:]:                                                                   # Loop over all modes, to add the yields
-#            specificPlotHistos = allPlots[mode][i_plot].histos                                      # get the histos from the specific mode which should be added
-#            specificHisto      = list( itertools.chain.from_iterable( specificPlotHistos ) )[i_hi]  # get the right histo of the specific mode to add to hi
+#for mode, label in [ ('ee','SF'), ('mue','all') ]:
+
+#    print
+
+#    for i_plot, plot in enumerate( allPlots['mumu'] ):                                                  # get all plots from first entry of allModes to add other modes
+#        print mode, label, plot.name, list( itertools.chain.from_iterable( plot.histos ) )                               # get all histos from there
+
+#        for i_hi, hi in enumerate( histoList0 ):                                                        # Loop over all histos to add the yields of other modes
+#        for i_hi, hi in enumerate( list( itertools.chain.from_iterable( plot.histos ) ) ):                                                        # Loop over all histos to add the yields of other modes
+
+#            specificPlotHistos = allPlots[mode][i_plot].histos                                          # get the histos from the specific mode which should be added
+#            specificHisto      = list( itertools.chain.from_iterable( specificPlotHistos ) )[i_hi]      # get the right histo of the specific mode to add to hi
 #            hi.Add( specificHisto )
 
-#drawPlots( allPlots[allModes[0]], "all", dataMCScale )
+#    drawPlots( allPlots['mumu'], label, dataMCScale )
 
 
