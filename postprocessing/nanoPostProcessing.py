@@ -20,7 +20,7 @@ import TTGammaEFT.Tools.user as user
 from TTGammaEFT.Tools.helpers                    import checkRootFile, bestDRMatchInCollection
 from TTGammaEFT.Tools.observables                import deltaR, deltaPhi, m3
 
-from TTGammaEFT.Tools.objectSelection            import particlePtEtaSelection, deltaRCleaning
+from TTGammaEFT.Tools.objectSelection            import particlePtEtaSelection, deltaRCleaning, triggerEmulatorSelector
 from TTGammaEFT.Tools.objectSelection            import getLeptons, getGoodLeptons, getSortedParticles, getUnsortedParticles, getGoodParticles
 from TTGammaEFT.Tools.objectSelection            import filterBJets, filterGenElectrons, filterGenMuons, filterGenPhotons, filterGenTops, filterGenBJets 
 from TTGammaEFT.Tools.objectSelection            import jetSelector, muonSelector, eleSelector, photonSelector, genJetSelector, genLeptonSelector, genPhotonSelector
@@ -32,7 +32,7 @@ from TTGammaEFT.Tools.objectSelection            import nanoDataElectronVarStrin
 
 from TTGammaEFT.Tools.constants                  import defaultValue
 
-from TTGammaEFT.Tools.overlapRemovalTTG          import hasMesonMother, getParentIds, isIsolatedPhoton, getPhotonCategory
+from TTGammaEFT.Tools.overlapRemovalTTG          import hasMesonMother, getParentIds, isIsolatedPhotonPrint, isIsolatedPhoton, getPhotonCategory
 
 from TTGammaEFT.Tools.WeightInfo                 import WeightInfo
 from TTGammaEFT.Tools.HyperPoly                  import HyperPoly
@@ -64,6 +64,7 @@ def get_parser():
     argParser.add_argument('--year',                        action='store',                     type=int,   choices=[2016,2017],    required = True,                    help="Which year?")
     argParser.add_argument('--addReweights',                action='store_true',                                                                                        help="Add reweights for sample EFT reweighting?")
     argParser.add_argument('--interpolationOrder',          action='store',         nargs='?',  type=int,                           default=2,                          help="Interpolation order for EFT weights.")
+    argParser.add_argument('--triggerSelection',            action='store_true',                                                                                        help="Trigger selection?" )
 
     return argParser
 
@@ -85,10 +86,11 @@ logger_rt = logger_rt.get_logger(options.logLevel, logFile = None )
 writeToDPM = options.targetDir == '/dpm/'
 
 #Samples: Load samples
-maxN = 100 if options.small else None
+maxN = None
 if options.small:
+    maxN = 100000
     options.job = 1
-    options.nJobs = 100 # set high to just run over 1 input file
+    options.nJobs = 10000000 # set high to just run over 1 input file
 
 if options.year == 2016:
     from Samples.nanoAOD.Summer16 import *
@@ -118,13 +120,15 @@ skimConds = ["(1)"]
 #    skimConds.append( "Sum$(LepGood_pt>10&&abs(LepGood_eta)<2.4) + Sum$(LepOther_pt>10&&abs(LepOther_eta)<2.5)>=2" )
 
 # Trigger selection
-#from TTGammaEFT.Tools.triggerSelector import triggerSelector
-#ts           = triggerSelector(options.year)
-#triggerCond  = ts.getSelection(options.samples[0] if isData else "MC")
-treeFormulas = {}#"triggerDecision": {'string':triggerCond} }
-#if isData and options.triggerSelection:
-#    logger.info("Sample will have the following trigger skim: %s"%triggerCond)
-#    skimConds.append( triggerCond )
+from TTGammaEFT.Tools.triggerSelector import triggerSelector
+ts           = triggerSelector(options.year)
+triggerCond  = ts.getSelection(options.samples[0] if isData else "MC")
+treeFormulas = {"triggerDecision": {'string':triggerCond} }
+if isData and options.triggerSelection:
+    logger.info("Sample will have the following trigger skim: %s"%triggerCond)
+    skimConds.append( triggerCond )
+
+skimConds = ["(1)"]
 
 #Samples: combine if more than one
 if len(samples)>1:
@@ -175,16 +179,21 @@ if not os.path.exists( output_directory ):
 
 #branches to be kept for data and MC
 branchKeepStrings_DATAMC = [\
-    "run", "luminosityBlock", "event", "fixedGridRhoFastjetAll", "PV_npvs", "PV_npvsGood",
-    "MET_MetUnclustEnUpDeltaX", "MET_MetUnclustEnUpDeltaY", "MET_sumEt", "CaloMET_phi", "CaloMET_pt", "CaloMET_sumEt", "MET_covXX", "MET_covXY", "MET_covYY", "MET_significance",
-    "MET_phi", "MET_pt",
-    "RawMET_phi", "RawMET_pt", "RawMET_sumEt",
-    "Flag_*","HLT_*",
+    "run", "luminosityBlock", "event",
+    "fixedGridRhoFastjetAll",
+    "PV_npvs", "PV_npvsGood",
+    "Pileup_*",
+    "RawMET_*", "PuppiMET_*",
+    "MET_*",
+    "Flag_*", "HLT_*", "LHE_*"
 ]
 
 #branches to be kept for MC samples only
 branchKeepStrings_MC = [\
-    "Generator_*", "GenPart_*", "nGenPart", "genWeight", "Pileup_nTrueInt",
+    "Generator_*",
+    "genWeight", "Pileup_nTrueInt",
+    "GenPart_*", "nGenPart",
+    "GenJet_*", "nGenJet",
 ]
 
 #branches to be kept for data only
@@ -250,7 +259,6 @@ if sample.isData:
 
 # Read Variables
 read_variables  = map( TreeVariable.fromString, ['run/I', 'luminosityBlock/I', 'event/l'] )
-read_variables += map( TreeVariable.fromString, ['PV_npvs/I', 'PV_npvsGood/I'] )
 read_variables += map( TreeVariable.fromString, ['MET_pt/F', 'MET_phi/F'] )
 read_variables += [ TreeVariable.fromString('nElectron/I'),
                     VectorTreeVariable.fromString('Electron[%s]'%nanoElectronVarString) ]
@@ -261,7 +269,6 @@ read_variables += [ TreeVariable.fromString('nPhoton/I'),
 read_variables += [ TreeVariable.fromString('nJet/I'),
                     VectorTreeVariable.fromString('Jet[%s]'%nanoJetVarString) ]
 if isMC:
-    read_variables += [ TreeVariable.fromString('Pileup_nTrueInt/F') ]
     read_variables += [ TreeVariable.fromString('nGenPart/I'),
                         VectorTreeVariable.fromString('GenPart[%s]'%nanoGenVarString) ]
     read_variables += [ TreeVariable.fromString('nGenJet/I'),
@@ -303,12 +310,10 @@ new_variables += [ 'photonJetdR/F', 'photonLepdR/F' ]
 new_variables += [ 'MET_pt_photonEstimated/F', 'MET_phi_photonEstimated/F', 'METSig_photonEstimated/F' ]
 new_variables += [ 'nJet/I' ] 
 new_variables += [ 'Jet[%s]'    %nanoJetVarString ]
-#new_variables += [ 'Electron[%s]' %nanoElectronVarString ]
-#new_variables += [ 'Muon[%s]'     %nanoMuonVarString ]
 new_variables += [ 'nLepton/I' ] 
 new_variables += [ 'Lepton[%s]' %nanoLeptonVarString.replace('/b','/I') ]
 new_variables += [ 'nPhoton/I' ] 
-new_variables += [ 'Photon[%s]' %nanoPhotonVarString ]
+new_variables += [ 'Photon[%s]' %nanoPhotonVarString.replace('/b','/I') ]
 new_variables += [ 'mll/F',  'mllgamma/F' ] 
 new_variables += [ 'm3/F',   'm3wBJet/F' ] 
 new_variables += [ 'lldR/F', 'lldPhi/F' ] 
@@ -316,18 +321,15 @@ new_variables += [ 'bbdR/F', 'bbdPhi/F' ]
 # Selected BJets
 new_variables += [ 'Bj0_' + var for var in nanoBJetVarString.split(',') ]
 new_variables += [ 'Bj1_' + var for var in nanoBJetVarString.split(',') ]
-# ttgamma categorization
 
 if isMC:
-#    nanoGenVarString    += ',photonCat/I'
-#    nanoGenJetVarString += ',photonCat/I'
     new_variables += [ 'GenElectron[%s]' %nanoGenVarString ]
     new_variables += [ 'GenMuon[%s]'     %nanoGenVarString ]
     new_variables += [ 'GenPhoton[%s]'   %nanoGenVarString ]
     new_variables += [ 'GenJet[%s]'      %nanoGenJetVarString ]
     new_variables += [ 'GenBJet[%s]'     %nanoGenJetVarString ]
     new_variables += [ 'GenTop[%s]'      %nanoGenVarString ]
-    new_variables += [ 'isTTGamma/I', 'isZGamma/I' ]
+    new_variables += [ 'isTTGamma/I', 'isZGamma/I', 'isSingleT/I' ]
 
 if isData:
     new_variables += ['jsonPassed/I']
@@ -380,8 +382,6 @@ def filler( event ):
     r = reader.event
     if options.sync: sync.print_header( r.run, r.luminosityBlock, r.event )
 
-    print r.run
-
     event.isData = isData
 
     if isMC:
@@ -390,24 +390,27 @@ def filler( event ):
         event.weight = lumiScaleFactor*r.genWeight if lumiScaleFactor is not None else defaultValue
 
         # GEN Particles
-        gPart       = getUnsortedParticles( r, collVars=nanoGenVars, coll="GenPart" )
+        gPart = getUnsortedParticles( r, collVars=nanoGenVars, coll="GenPart" )
         # GEN Jets
-        gJets       = getSortedParticles( r, collVars=nanoGenJetVars, coll="GenJet" )
-
-        # Split gen particles
-        GenElectron = getGoodParticles( genLeptonSelector(), filterGenElectrons( gPart ) )
-        GenMuon     = getGoodParticles( genLeptonSelector(), filterGenMuons( gPart )     )
-        GenPhoton   = getGoodParticles( genPhotonSelector(), filterGenPhotons( gPart )   )
-        GenTop      = getGoodParticles( genJetSelector(),    filterGenTops( gPart )      )
-        GenJet      = getGoodParticles( genJetSelector(),    gJets                       )  
-        GenBJet     = getGoodParticles( genJetSelector(),    filterGenBJets( gJets )     )
+        gJets = getSortedParticles( r, collVars=nanoGenJetVars, coll="GenJet" )
 
         # Overlap removal flags for ttgamma/ttbar and Zgamma/DY
-        GenIsoPhoton    = filter( lambda g: isIsolatedPhoton( g, gPart, coneSize=0.2, ptCut=5 ), GenPhoton )
-        GenIsoPhoton    = filter( lambda g: not hasMesonMother( getParentIds( g, gPart ) ),      GenIsoPhoton )
-        event.isTTGamma = len( getGoodParticles( genPhotonSelector( 'overlapTTGamma' ), GenIsoPhoton ) ) > 0 
-        event.isZGamma  = len( getGoodParticles( genPhotonSelector( 'overlapZGamma' ),  GenIsoPhoton ) ) > 0 
+        GenPhoton           = filterGenPhotons( gPart, status='last' )
+        GenIsoPhoton        = filter( lambda g: isIsolatedPhoton( g, gPart, coneSize=0.2, ptCut=5 ), GenPhoton    )
+        GenIsoPhotonNoMeson = filter( lambda g: not hasMesonMother( getParentIds( g, gPart ) ),      GenIsoPhoton )
+
+        event.isTTGamma = len( getGoodParticles( genPhotonSelector( 'overlapTTGamma' ), GenIsoPhotonNoMeson ) ) > 0 
+        event.isZGamma  = len( getGoodParticles( genPhotonSelector( 'overlapZGamma' ),  GenIsoPhotonNoMeson ) ) > 0 
+        event.isSingleT = defaultValue # To Do for semileptonic ttg
      
+        # Split gen particles
+        GenElectron = getGoodParticles( genLeptonSelector(), filterGenElectrons( gPart, status='last' ) )
+        GenMuon     = getGoodParticles( genLeptonSelector(), filterGenMuons( gPart, status='last' )     )
+        GenPhoton   = getGoodParticles( genPhotonSelector(), GenPhoton                                  )
+        GenTop      = getGoodParticles( genJetSelector(),    filterGenTops( gPart )                     )
+        GenJet      = getGoodParticles( genJetSelector(),    gJets                                      )  
+        GenBJet     = getGoodParticles( genJetSelector(),    filterGenBJets( gJets )                    )
+
         # Store
         if len(GenElectron) > 0: fill_vector_collection( event, "GenElectron", nanoGenVars,    GenElectron )
         if len(GenMuon) > 0:     fill_vector_collection( event, "GenMuon",     nanoGenVars,    GenMuon )
@@ -473,11 +476,15 @@ def filler( event ):
     tightLeptons = getGoodLeptons( r, eleSelector( "tight", year=options.year ), muonSelector( "tight" ), eleCollVars=nanoElectronVars, eleColl="Electron", muonCollVars=nanoMuonVars, muonColl="Muon" )
     vetoLeptons  = getGoodLeptons( r, eleSelector( "veto", year=options.year ),  muonSelector( "veto" ),  eleCollVars=nanoElectronVars, eleColl="Electron", muonCollVars=nanoMuonVars, muonColl="Muon" )
 
-    # replace unsign. char type with integer (only necessary for output electrons)
-    for l in filter( lambda l: abs(l['pdgId'])==11, looseLeptons ):
-        l['lostHits']    = ord( l['lostHits'] )
-        if isMC: l['genPartFlav'] = ord( l['genPartFlav'] )
+    # Select one tight and one loose lepton, the tight is included in the loose collection
+    selectedLeptons = tightLeptons[:1] + looseLeptons[:2]
 
+    # Replace unsign. char type with integer (only necessary for output electrons)
+    for l in looseLeptons:
+        if abs(l['pdgId'])==11: l['lostHits']    = ord( l['lostHits'] )
+        if isMC:                l['genPartFlav'] = ord( l['genPartFlav'] )
+
+    # Add variables to lepton dictionaries which are unique for electrons or muons
     addMissingVariables( looseLeptons, nanoLeptonVars )
 
     looseElectrons  = filter( lambda l: abs(l['pdgId'])==11, looseLeptons )
@@ -495,19 +502,20 @@ def filler( event ):
     event.nMuonTight     = len(tightMuons)
 
     fill_vector_collection( event, "Lepton", nanoLeptonVars, looseLeptons )
-#    fill_vector_collection( event, "Electron", nanoElectronVars, looseElectrons )
-#    fill_vector_collection( event, "Muon",     nanoMuonVars,     looseMuons )
 
     # Photons
-    allPhotons     = getSortedParticles( r, nanoPhotonVars, coll="Photon" )
-    photons        = getGoodParticles( photonSelector( 'medium', year=options.year ), allPhotons )
-    photons        = deltaRCleaning( photons, looseLeptons, dRCut = 0.1 )
+    allPhotons = getUnsortedParticles( r, nanoPhotonVars, coll="Photon" )
+    photons    = getGoodParticles( photonSelector( 'medium', year=options.year ), allPhotons )
+    photons    = deltaRCleaning( photons, selectedLeptons, dRCut=0.1 )
+
+    if isMC:
+        for p in photons: p['genPartFlav'] = ord( p['genPartFlav'] )
 
     # Jets
-    allJets  = getSortedParticles(r, collVars=nanoJetVars, coll="Jet")
+    allJets  = getUnsortedParticles( r, collVars=nanoJetVars, coll="Jet")
     goodJets = getGoodParticles( jetSelector(), allJets )
-    goodJets = deltaRCleaning( goodJets, looseLeptons, dRCut = 0.4 )
-    goodJets = deltaRCleaning( goodJets, photons, dRCut = 0.1 )
+    goodJets = deltaRCleaning( goodJets, selectedLeptons, dRCut=0.4 )
+    goodJets = deltaRCleaning( goodJets, photons, dRCut=0.1 )
     
     # Store jets
     event.nJet    = len(goodJets)
@@ -528,8 +536,8 @@ def filler( event ):
     # Additional observables
     event.m3      = m3( goodJets )[0]
     event.m3wBJet = m3( goodJets, nBJets=1, tagger=tagger, year=options.year )[0]
-    event.ht         = sum([j['pt'] for j in goodJets])
-    event.METSig     = r.MET_pt/sqrt(event.ht) if event.ht>0 else defaultValue
+    event.ht      = sum( [ j['pt'] for j in goodJets ] )
+    event.METSig  = r.MET_pt / sqrt( event.ht ) if event.ht > 0 else defaultValue
 
     # Store photons
     if len(photons) > 0:
@@ -539,7 +547,6 @@ def filler( event ):
             for g in photons:
                 genMatch = filter( lambda p: p['index'] == g['genPartIdx'], gPart )[0] if g['genPartIdx'] > 0 and isMC else None
                 g['photonCat'] = getPhotonCategory( genMatch, gPart )
-
 
         fill_vector_collection( event, "Photon", nanoPhotonVars + ['photonCat'] if isMC else nanoPhotonVars, photons )
 
@@ -559,8 +566,42 @@ def filler( event ):
         event.lldR     = deltaR( looseLeptons[0], looseLeptons[1] )
         event.lldPhi   = deltaPhi( looseLeptons[0]['phi'], looseLeptons[1]['phi'] )
         event.mll      = ( get4DVec(looseLeptons[0]) + get4DVec(looseLeptons[1]) ).M()
+
         if len(photons) > 0:
             event.mllgamma = ( get4DVec(looseLeptons[0]) + get4DVec(looseLeptons[1]) + get4DVec(photons[0]) ).M()
+
+    if False and event.nPhoton>0 and event.nLepton==2 and event.nLeptonVeto==2 and event.nLeptonTight>0 and event.mll>40 and looseLeptons[0]['pdgId']*looseLeptons[1]['pdgId']<0:
+        print isIsolatedPhotonPrint( gPart[photons[0]['genPartIdx']], gPart, coneSize=0.2, ptCut=5 )
+
+        print 'iso', GenIsoPhoton
+        print 'iso no meson', GenIsoPhotonNoMeson
+        print getGoodParticles( genPhotonSelector( 'overlapTTGamma' ), GenIsoPhoton )
+        print len( getGoodParticles( genPhotonSelector( 'overlapTTGamma' ), GenIsoPhoton ) ) > 0
+        print 'overlap is ttgamma'
+        print event.isTTGamma
+        print 'nElectrons'
+        print event.nElectron
+        print 'photons'
+        print photons
+        print 'leptons'
+        print looseLeptons
+        print 'gen photon'
+        print gPart[photons[0]['genPartIdx']]
+        print 'gen photon mother'
+        print getParentIds( gPart[photons[0]['genPartIdx']], gPart )
+        print 'close lepton'
+        dr = [ (deltaR(photons[0],l),i) for i,l in enumerate(allLeptons)]
+        mindr = min([item[0] for item in dr])
+        ind = [item[1] for item in dr if item[0]==mindr][0]
+        print 'gen',min([ deltaR(gPart[photons[0]['genPartIdx']],g) for g in gPart if g['pdgId']!=22 and g['pt']>5 and g['status']>=0])
+        print 'all',min([ deltaR(photons[0],l) for l in allLeptons])
+        print 'veto', min([ deltaR(photons[0],l) for l in vetoLeptons])
+        print 'loose', min([ deltaR(photons[0],l) for l in looseLeptons])
+        print 'close lep'
+        print allLeptons[ind]
+        print
+        print
+        print
 
 # Create a maker. Maker class will be compiled. This instance will be used as a parent in the loop
 treeMaker_parent = TreeMaker(
@@ -582,9 +623,9 @@ logger.info( "Splitting into %i ranges of %i events on average. FileBasedSplitti
         options.job)
 
 #Define all jobs
-jobs = [(i, eventRanges[i]) for i in range(len(eventRanges))]
+jobs = [ (i, range) for i, range in enumerate( eventRanges ) ]
 
-filename, ext = os.path.splitext( os.path.join(output_directory, sample.name + '.root') )
+filename, ext = os.path.splitext( os.path.join( output_directory, sample.name + '.root' ) )
 
 if options.fileBasedSplitting and len(eventRanges)>1:
     raise RuntimeError("Using fileBasedSplitting but have more than one event range!")
@@ -619,20 +660,20 @@ for ievtRange, eventRange in enumerate( eventRanges ):
 
     if options.small: 
         logger.info("Running 'small'. Not more than 10000 events") 
-        nMaxEvents = eventRange[1]-eventRange[0]
-        eventRange = ( eventRange[0], eventRange[0] +  min( [nMaxEvents, 10000] ) )
+        nMaxEvents = eventRange[1] - eventRange[0]
+        eventRange = ( eventRange[0], eventRange[0] +  min( [ nMaxEvents, maxN ] ) )
 
     # Set the reader to the event range
     reader.setEventRange( eventRange )
 
     # Clone the empty maker in order to avoid recompilation at every loop iteration
-    clonedTree = reader.cloneTree( branchKeepStrings, newTreename = "Events", rootfile = outputfile )
+    clonedTree    = reader.cloneTree( branchKeepStrings, newTreename = "Events", rootfile = outputfile )
     clonedEvents += clonedTree.GetEntries()
     # Add the TTreeFormulas
     for formula in treeFormulas.keys():
-        treeFormulas[formula]['TTreeFormula'] = ROOT.TTreeFormula(formula, treeFormulas[formula]['string'], clonedTree )
+        treeFormulas[formula]['TTreeFormula'] = ROOT.TTreeFormula( formula, treeFormulas[formula]['string'], clonedTree )
 
-    maker = treeMaker_parent.cloneWithoutCompile( externalTree = clonedTree )
+    maker = treeMaker_parent.cloneWithoutCompile( externalTree=clonedTree )
 
     maker.start()
     # Do the thing
@@ -640,13 +681,12 @@ for ievtRange, eventRange in enumerate( eventRanges ):
 
     while reader.run():
         maker.run()
-        if isData:
-            if maker.event.jsonPassed_:
-                if reader.event.run not in outputLumiList.keys():
-                    outputLumiList[reader.event.run] = set([reader.event.luminosityBlock])
-                else:
-                    if reader.event.luminosityBlock not in outputLumiList[reader.event.run]:
-                        outputLumiList[reader.event.run].add(reader.event.luminosityBlock)
+        if isData and maker.event.jsonPassed_:
+            if reader.event.run not in outputLumiList.keys():
+                outputLumiList[reader.event.run] = set( [ reader.event.luminosityBlock ] )
+            else:
+                if reader.event.luminosityBlock not in outputLumiList[reader.event.run]:
+                    outputLumiList[reader.event.run].add(reader.event.luminosityBlock)
 
     convertedEvents += maker.tree.GetEntries()
     maker.tree.Write()
@@ -660,26 +700,26 @@ logger.info( "Converted %i events of %i, cloned %i",  convertedEvents, reader.nE
 
 # Storing JSON file of processed events
 if isData:
-    jsonFile = filename+'_%s.json'%(0 if options.nJobs==1 else options.job)
-    LumiList( runsAndLumis = outputLumiList ).writeJSON(jsonFile)
+    jsonFile = filename + '_%s.json' %( 0 if options.nJobs==1 else options.job )
+    LumiList( runsAndLumis = outputLumiList ).writeJSON( jsonFile )
     logger.info( "Written JSON file %s",  jsonFile )
 
-logger.info("Copying log file to %s", output_directory )
-copyLog = subprocess.call(['cp', logFile, output_directory] )
+logger.info( "Copying log file to %s", output_directory )
+copyLog = subprocess.call( [ 'cp', logFile, output_directory ] )
 if copyLog:
-    logger.info( "Copying log from %s to %s failed", logFile, output_directory)
+    logger.info( "Copying log from %s to %s failed", logFile, output_directory )
 else:
     logger.info( "Successfully copied log file" )
-    os.remove(logFile)
+    os.remove( logFile )
     logger.info( "Removed temporary log file" )
 
 if writeToDPM:
     for dirname, subdirs, files in os.walk( directory ):
         logger.debug( 'Found directory: %s',  dirname )
         for fname in files:
-            source = os.path.abspath(os.path.join(dirname, fname))
+            source  = os.path.abspath( os.path.join( dirname, fname ) )
             postfix = '_small' if options.small else ''
-            cmd = ['xrdcp', source, 'root://hephyse.oeaw.ac.at/%s' % os.path.join( user_dpm_directory, 'postprocessed',  options.processingEra+postfix, options.skim, sample.name, fname ) ]
+            cmd     = [ 'xrdcp', source, 'root://hephyse.oeaw.ac.at/%s' % os.path.join( user_dpm_directory, 'postprocessed',  options.processingEra + postfix, options.skim, sample.name, fname ) ]
             logger.info( "Issue copy command: %s", " ".join( cmd ) )
             subprocess.call( cmd )
 
