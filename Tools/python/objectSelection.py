@@ -36,7 +36,7 @@ nanoDataBJetVars     = [item.split('/')[0] for item in nanoDataBJetVarString.spl
 
 photonIdCutBased   = { 'fail':0, 'loose':1, 'medium':2, 'tight':3 }              # NanoAOD Version
 electronIdCutBased = { 'fail':0, 'veto':1,  'loose':2,  'medium':3, 'tight':4 }  # NanoAOD Version
-jetIdBitwise       = { 'fail':0, 'loose':1, 'tight':3 }                          #bitwise (Jet ID flags bit1 is loose, bit2 is tight -> int(00)=0 == fail, int(01)=1 == loose, int(11)=3 == tight)
+jetIdBitwise       = { 'fail':0, 'loose':1, 'tight':3 }                          # Bitwise (Jet ID flags bit1 is loose, bit2 is tight -> int(00)=0 == fail, int(01)=1 == loose, int(11)=3 == tight)
 
 # General Selection Functions
 def particlePtEtaSelection( collection, ptCut=10, absEtaCut=2.4 ):
@@ -116,16 +116,16 @@ def filterBJets( jets, tagger = 'DeepCSV', year = 2016 ):
     bJets.sort( key = lambda j: -j['pt'] )
     return bJets
 
-def muonVertexSelector( l ):
+def vertexSelector( l ):
     if abs(l["dxy"]) >= 0.05: return False
     if abs(l["dz"])  >= 0.1:  return False
     return True
 
-def electronVertexSelector( l ):
-    EC = abs(l["eta"]) > 1.479
-    if abs(l["dxy"])       >= 0.05: return False
-    if EC and abs(l["dz"]) >= 0.1:  return False
-    return True
+#def electronVertexSelector( l ):
+#    EC = abs(l["eta"]) > 1.479
+#    if abs(l["dxy"])       >= 0.05: return False
+#    if EC and abs(l["dz"]) >= 0.1:  return False
+#    return True
 
 def photonIDSelector( p ):
     # still missing: relIso_neutral, relIso_photon  (should be in medium cutbased ID)
@@ -140,7 +140,7 @@ def triggerEmulatorSelector( l ):
     ECSc = abs(l["eta"] + l["deltaEtaSC"]) > 1.479
     if l["sieie"]            >= (0.011+0.019*ECSc): return False
 #    if abs(l["dPhiScTrkIn"]) >= (0.04+0.03*ECSc):  return False
-#    if abs(l["deltaEtaSC"])  >= (0.01-0.002*ECSc): return False
+#    if abs(l["dEtaSCTrkIn"]) >= (0.01-0.002*ECSc): return False
     if l["eInvMinusPInv"]    <= -0.05:              return False
     if l["eInvMinusPInv"]    >= (0.01-0.005*ECSc):  return False
     if l["hoe"]              >= (0.10-0.03*ECSc):   return False
@@ -154,27 +154,27 @@ def jetSelector():
     # According to AN-2017/197
     # hadron multiplicity > 0 still missing
     def func(j):
-        if j["pt"]            <= 30:   return False
-        if abs(j["eta"])      >= 2.4:  return False
-        if j["nConstituents"]  < 2:    return False
-        if j["neHEF"]         >= 0.99: return False
-        if j["neEmEF"]        >= 0.99: return False
-        if j["chEmEF"]        >= 0.99: return False
-        if j["chHEF"]         <= 0.:   return False
-        if j["jetId"]          < jetIdBitwise['loose']: return False
+        if j["pt"]            <= 30:           return False
+        if abs(j["eta"])      >= 2.4:          return False
+        if j["nConstituents"]  < 2:            return False
+        if j["neHEF"]         >= 0.99:         return False
+        if j["neEmEF"]        >= 0.99:         return False
+        if j["chEmEF"]        >= 0.99:         return False
+        if j["chHEF"]         <= 0.:           return False
+        if j["jetId"] < jetIdBitwise['loose']: return False
         return True
     return func
 
 def muonSelector( lepton_selection ):
     # According to AN-2017/197
-    # muon veto: softId should be vetoId
+    # muon veto: softId is vetoId?
     if lepton_selection == 'tight':
         def func(l):
             if l["pt"]             <= 25:   return False
             if abs(l["eta"])       >= 2.4:  return False
             if l['pfRelIso03_all'] >= 0.12: return False
             if l["sip3d"]          >= 4:    return False
-            if not muonVertexSelector(l):   return False
+            if not vertexSelector(l):       return False
             if not l["mediumId"]:           return False
             return True
         return func
@@ -185,7 +185,7 @@ def muonSelector( lepton_selection ):
             if abs(l["eta"])       >= 2.4:  return False
             if l['pfRelIso03_all'] >= 0.12: return False
             if l["sip3d"]          >= 4:    return False
-            if not muonVertexSelector(l):   return False
+            if not vertexSelector(l):       return False
             if not l["mediumId"]:           return False
             return True
         return func
@@ -196,7 +196,7 @@ def muonSelector( lepton_selection ):
             if abs(l["eta"])       >= 2.4:  return False
             if l['pfRelIso03_all'] >= 0.4:  return False
             if l["sip3d"]          >= 4:    return False
-            if not muonVertexSelector(l):   return False
+            if not vertexSelector(l):       return False
             return True
         return func
 
@@ -213,8 +213,9 @@ def eleSelector( lepton_selection, year=2016 ):
             if l["sip3d"]          >= 4:               return False
             if ord(l["lostHits"])  != 0:               return False
             if not l["convVeto"]:                      return False
-            if not electronVertexSelector(l):          return False
+            if not vertexSelector(l):                  return False
             if not triggerEmulatorSelector(l):         return False
+#            if l[idVar] < electronIdCutBased['medium']: return False
             if l[idVar] < electronIdCutBased['loose']: return False
             return True
         return func
@@ -227,8 +228,9 @@ def eleSelector( lepton_selection, year=2016 ):
             if l["sip3d"]          >= 4:               return False
             if ord(l["lostHits"])  != 0:               return False
             if not l["convVeto"]:                      return False
-            if not electronVertexSelector(l):          return False
+            if not vertexSelector(l):                  return False
             if not triggerEmulatorSelector(l):         return False
+#            if l[idVar] < electronIdCutBased['medium']: return False
             if l[idVar] < electronIdCutBased['loose']: return False
             return True
         return func
@@ -239,8 +241,8 @@ def eleSelector( lepton_selection, year=2016 ):
             if abs(l["eta"])       >= 2.4:             return False
             if l['pfRelIso03_all'] >= 0.4:             return False
             if l["sip3d"]          >= 4:               return False
-            if not electronVertexSelector(l):          return False
-            if l[idVar] < electronIdCutBased['loose']: return False
+            if not vertexSelector(l):                  return False
+            if l[idVar] < electronIdCutBased['veto']:  return False
             return True
         return func
 
@@ -255,25 +257,13 @@ def photonSelector( selection, year=2016 ):
     idVar = "cutBased" if year==2016 else "cutBasedBitmap"
     if selection == 'medium':
         def func(g):
-            if g["pt"]             <= 20:              return False
-            if abs(g["eta"])       >= 1.479:           return False
-            if not g["pixelSeed"]:                     return False
-#            if not barrelEndcapVeto(g):                return False
-            if not photonIDSelector(g):                return False
-            if not g["electronVeto"]:                  return False
-            if g[idVar] < photonIdCutBased[selection]: return False
-            return True
-        return func
-
-    if selection == 'forward':
-        def func(g):
-            if g["pt"]             <= 20:              return False
-            if abs(g["eta"])        < 1.479:           return False
-            if not g["pixelSeed"]:                     return False
-            if not barrelEndcapVeto(g):                return False
-            if not photonIDSelector(g):                return False
-            if not g["electronVeto"]:                  return False
-            if g[idVar] < photonIdCutBased['medium']:  return False
+            if g["pt"]       <= 20:                   return False
+            if abs(g["eta"]) >= 1.479:                return False
+            if g["pixelSeed"]:                        return False
+#            if not barrelEndcapVeto(g):               return False
+            if not photonIDSelector(g):               return False
+            if not g["electronVeto"]:                 return False
+            if g[idVar] < photonIdCutBased['medium']: return False
             return True
         return func
 

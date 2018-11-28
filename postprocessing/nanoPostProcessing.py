@@ -88,7 +88,7 @@ writeToDPM = options.targetDir == '/dpm/'
 #Samples: Load samples
 maxN = None
 if options.small:
-    maxN = 100000
+    maxN = 400000
     options.job = 1
     options.nJobs = 10000000 # set high to just run over 1 input file
 
@@ -173,8 +173,12 @@ if os.path.exists( output_directory ) and options.overwrite:
         shutil.rmtree( output_directory, ignore_errors=True )
 
 if not os.path.exists( output_directory ):
-    os.makedirs( output_directory )
-    logger.info( "Created output directory %s.", output_directory )
+    try:
+        os.makedirs( output_directory )
+        logger.info( "Created output directory %s.", output_directory )
+    except:
+        logger.info( "Directory %s already exists.", output_directory )
+        pass
 
 
 #branches to be kept for data and MC
@@ -396,8 +400,8 @@ def filler( event ):
 
         # Overlap removal flags for ttgamma/ttbar and Zgamma/DY
         GenPhoton           = filterGenPhotons( gPart, status='last' )
-        GenIsoPhoton        = filter( lambda g: isIsolatedPhoton( g, gPart, coneSize=0.2, ptCut=5 ), GenPhoton    )
-        GenIsoPhotonNoMeson = filter( lambda g: not hasMesonMother( getParentIds( g, gPart ) ),      GenIsoPhoton )
+        GenIsoPhoton        = filter( lambda g: isIsolatedPhoton( g, gPart, coneSize=0.2, ptCut=5, excludedPdgIds=[12,-12,14,-14,16,-16] ), GenPhoton    )
+        GenIsoPhotonNoMeson = filter( lambda g: not hasMesonMother( getParentIds( g, gPart ) ), GenIsoPhoton )
 
         event.isTTGamma = len( getGoodParticles( genPhotonSelector( 'overlapTTGamma' ), GenIsoPhotonNoMeson ) ) > 0 
         event.isZGamma  = len( getGoodParticles( genPhotonSelector( 'overlapZGamma' ),  GenIsoPhotonNoMeson ) ) > 0 
@@ -570,8 +574,11 @@ def filler( event ):
         if len(photons) > 0:
             event.mllgamma = ( get4DVec(looseLeptons[0]) + get4DVec(looseLeptons[1]) + get4DVec(photons[0]) ).M()
 
-    if False and event.nPhoton>0 and event.nLepton==2 and event.nLeptonVeto==2 and event.nLeptonTight>0 and event.mll>40 and looseLeptons[0]['pdgId']*looseLeptons[1]['pdgId']<0:
-        print isIsolatedPhotonPrint( gPart[photons[0]['genPartIdx']], gPart, coneSize=0.2, ptCut=5 )
+#    if True and len(nonCleandPhotons)>0 and event.nLepton==2 and event.nLeptonVeto==2 and event.nLeptonTight>0 and event.mll>40 and looseLeptons[0]['pdgId']*looseLeptons[1]['pdgId']<0:
+    if False and not event.isTTGamma and event.nElectron==1 and event.nMuon==1 and event.nPhoton>0 and event.nLepton==2 and event.nLeptonVeto==2 and event.nLeptonTight>0 and event.mll>40 and looseLeptons[0]['pdgId']*looseLeptons[1]['pdgId']<0:
+        print r.event
+    if False and not event.isTTGamma and event.nPhoton>0 and event.nLepton==2 and event.nLeptonVeto==2 and event.nLeptonTight>0 and event.mll>40 and looseLeptons[0]['pdgId']*looseLeptons[1]['pdgId']<0:
+        print isIsolatedPhotonPrint( gPart[photons[0]['genPartIdx']], gPart, coneSize=0.2, ptCut=5, excludedPdgIds=[12,-12,14,-14,16,-16] )
 
         print 'iso', GenIsoPhoton
         print 'iso no meson', GenIsoPhotonNoMeson
@@ -599,6 +606,11 @@ def filler( event ):
         print 'loose', min([ deltaR(photons[0],l) for l in looseLeptons])
         print 'close lep'
         print allLeptons[ind]
+        print
+        print
+        print
+        print
+        print
         print
         print
         print

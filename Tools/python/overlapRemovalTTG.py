@@ -1,38 +1,29 @@
 from TTGammaEFT.Tools.objectSelection import isGoodParticle
 from TTGammaEFT.Tools.observables     import deltaR
 
-def isIsolatedPhoton( g, genparts, coneSize=0.2, ptCut=5 ):
+def isIsolatedPhoton( g, genparts, coneSize=0.2, ptCut=5, excludedPdgIds=[] ):
     for other in genparts:
-        if other['pdgId']    == 22:       continue   # Avoid photon or generator copies of it
-        if other['status']    < 0:        continue   # Only final state particles
-        if other['pt']        < ptCut:    continue   # pt > 5
-        if deltaR( g, other ) > coneSize: continue   # check deltaR
+        if other['pdgId']              == 22:       continue   # Avoid photon or generator copies of it
+        if other['pdgId'] in excludedPdgIds:        continue   # Avoid particles you don't want to consider (e.g. neutrinos)
+        if abs( other['pt'] - g['pt'] ) < 0.0001:   continue   # Same particle
+        if other['status']             != 1:        continue   # Only final state particles
+        if other['pt']                  < ptCut:    continue   # pt > 5
+        if deltaR( g, other )           > coneSize: continue   # check deltaR
         return False
     return True
 
-def isIsolatedPhotonPrint( g, genparts, coneSize=0.2, ptCut=5 ):
+def isIsolatedPhotonPrint( g, genparts, coneSize=0.2, ptCut=5, excludedPdgIds=[] ):
     for other in genparts:
-        if other['pdgId']    == 22:       continue
-        if other['status']    < 0:        continue
-        if other['pt']        < ptCut:    continue
-        if deltaR( g, other ) > coneSize: continue
+        if other['pdgId']              == 22:       continue   # Avoid photon or generator copies of it
+        if other['pdgId'] in excludedPdgIds:        continue   # Avoid particles you don't want to consider (e.g. neutrinos)
+        if abs( other['pt'] - g['pt'] ) < 0.0001:   continue   # Same particle
+        if other['status']             != 1:        continue   # Only final state particles
+        if other['pt']                  < ptCut:    continue   # pt > 5
+        if deltaR( g, other )           > coneSize: continue   # check deltaR
         print 'not isolated, deltaR = ', deltaR( g, other )
         print 'closest gen particle: ', other
         return False
     return True
-
-# Categories for overlap removal (moved to object selection genPhotonSelector
-#def isTTGammaPhoton( g ):
-#    return g['pt'] > 13 and abs(g['eta']) < 3.0
-
-#def isZGammaPhoton( g ):
-#    return g['pt'] > 15 and abs(g['eta']) < 2.6
-
-#def isIsoTTGammaPhoton( g, genparts ):
-#    return g['pt'] > 13 and abs(g['eta']) < 3.0 and isIsolatedPhoton( g, genparts, 0.2 )
-
-#def isIsoZGammaPhoton( g, genparts ):
-#    return g['pt'] > 15 and abs(g['eta']) < 2.6 and isIsolatedPhoton( g, genparts, 0.2 )
 
 # Run through parents in genparticles, and return list of their pdgId
 def getParentIds( g, genParticles ):
@@ -49,6 +40,7 @@ def getParentIds( g, genParticles ):
   return parents
 
 def hasMesonMother( parentList ):
+    # additionally check if the gluon is before the top, otherwise b > gluon q q with q > gamma q?
     parentList = map( abs, set(parentList) )
     return max(parentList) > 37 if len(parentList) != 0 else False
 
