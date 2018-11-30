@@ -7,7 +7,7 @@ if os.environ['USER'] in ['schoef', 'rschoefbeck', 'schoefbeck']:
     tmp_directory                   = "/afs/hephy.at/data/rschoefbeck02/TTGammaEFT_tmp/"
     plot_directory                  = "/afs/hephy.at/user/r/rschoefbeck/www/TTGammaEFT/"
     data_directory                  = "/afs/hephy.at/data/rschoefbeck01/cmgTuples/"
-    postprocessing_directory        = "TopEFT_PP_2016_TTG_v3/dilep/"
+    postprocessing_directory        = "TTGammaEFT_PP_2016_TTG_v5/inclusive/"
     postprocessing_output_directory = "/afs/hephy.at/data/rschoefbeck02/cmgTuples/"
     analysis_results                = results_directory
 
@@ -18,6 +18,6 @@ if os.environ['USER'] in ['llechner']:
     skim_output_directory               = "/afs/hephy.at/data/llechner01/TTGammaEFT/skims/"
     plot_directory                      = "/afs/hephy.at/user/l/llechner/www/TTGammaEFT/"
     data_directory                      = "/afs/hephy.at/data/llechner01/TTGammaEFT/nanoTuples/"
-    postprocessing_directory            = "TopEFT_PP_2016_TTG_v3/dilep/"
+    postprocessing_directory            = "TTGammaEFT_PP_2016_TTG_v5/inclusive/"
     postprocessing_output_directory     = "/afs/hephy.at/data/llechner01/TTGammaEFT/nanoTuples/"
     analysis_results                    = results_directory

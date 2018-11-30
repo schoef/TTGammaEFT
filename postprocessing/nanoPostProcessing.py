@@ -88,7 +88,7 @@ writeToDPM = options.targetDir == '/dpm/'
 #Samples: Load samples
 maxN = None
 if options.small:
-    maxN = 400000
+    maxN = 200000
     options.job = 1
     options.nJobs = 10000000 # set high to just run over 1 input file
 
@@ -114,10 +114,6 @@ assert isData or len(set([s.xSection for s in samples]))==1, "Not all samples ha
 assert isMC or len(samples)==1, "Don't concatenate data samples"
 
 skimConds = ["(1)"]
-#if isSingleLep:
-#    skimConds.append( "Sum$(Electron_pt>20&&abs(Electron_eta)<2.5) + Sum$(LepOther_pt>20&&abs(LepOther_eta)<2.5)>=1" )
-#elif isDiLep:
-#    skimConds.append( "Sum$(LepGood_pt>10&&abs(LepGood_eta)<2.4) + Sum$(LepOther_pt>10&&abs(LepOther_eta)<2.5)>=2" )
 
 # Trigger selection
 from TTGammaEFT.Tools.triggerSelector import triggerSelector
@@ -127,8 +123,6 @@ treeFormulas = {"triggerDecision": {'string':triggerCond} }
 if isData and options.triggerSelection:
     logger.info("Sample will have the following trigger skim: %s"%triggerCond)
     skimConds.append( triggerCond )
-
-skimConds = ["(1)"]
 
 #Samples: combine if more than one
 if len(samples)>1:
@@ -186,10 +180,9 @@ branchKeepStrings_DATAMC = [\
     "run", "luminosityBlock", "event",
     "fixedGridRhoFastjetAll",
     "PV_npvs", "PV_npvsGood",
-    "Pileup_*",
     "RawMET_*", "PuppiMET_*",
     "MET_*",
-    "Flag_*", "HLT_*", "LHE_*"
+    "Flag_*", "HLT_*",
 ]
 
 #branches to be kept for MC samples only
@@ -198,6 +191,8 @@ branchKeepStrings_MC = [\
     "genWeight", "Pileup_nTrueInt",
     "GenPart_*", "nGenPart",
     "GenJet_*", "nGenJet",
+    "Pileup_*",
+    "LHE_*"
 ]
 
 #branches to be kept for data only
@@ -322,6 +317,12 @@ new_variables += [ 'mll/F',  'mllgamma/F' ]
 new_variables += [ 'm3/F',   'm3wBJet/F' ] 
 new_variables += [ 'lldR/F', 'lldPhi/F' ] 
 new_variables += [ 'bbdR/F', 'bbdPhi/F' ] 
+new_variables += [ 'mL0Gamma/F',  'mL1Gamma/F' ] 
+new_variables += [ 'l0GammadR/F', 'l0GammadPhi/F' ] 
+new_variables += [ 'l1GammadR/F', 'l1GammadPhi/F' ] 
+new_variables += [ 'j0GammadR/F', 'j0GammadPhi/F' ] 
+new_variables += [ 'j1GammadR/F', 'j1GammadPhi/F' ] 
+
 # Selected BJets
 new_variables += [ 'Bj0_' + var for var in nanoBJetVarString.split(',') ]
 new_variables += [ 'Bj1_' + var for var in nanoBJetVarString.split(',') ]
@@ -512,6 +513,9 @@ def filler( event ):
     photons    = getGoodParticles( photonSelector( 'medium', year=options.year ), allPhotons )
     photons    = deltaRCleaning( photons, selectedLeptons, dRCut=0.1 )
 
+    photonsCheck    = getGoodParticles( photonSelector( 'mediumCheck', year=options.year ), allPhotons )
+    photonsCheck    = deltaRCleaning( photonsCheck, selectedLeptons, dRCut=0.1 )
+
     if isMC:
         for p in photons: p['genPartFlav'] = ord( p['genPartFlav'] )
 
@@ -560,6 +564,21 @@ def filler( event ):
         if len(goodJets) > 0:     event.photonJetdR                 = min( deltaR(photons[0], j ) for j in goodJets )
         if len(looseLeptons) > 0: event.photonLepdR                 = min( deltaR(photons[0], l ) for l in looseLeptons )
 
+        if len(looseLeptons) > 0:
+            event.l0GammadPhi = deltaPhi( looseLeptons[0]['phi'], photons[0]['phi'] )
+            event.l0GammadR   = deltaR( looseLeptons[0], photons[0] )
+            event.mL0Gamma    = ( get4DVec(looseLeptons[0]) + get4DVec(photons[0]) ).M()
+        if len(looseLeptons) > 1:
+            event.l1GammadPhi = deltaPhi( looseLeptons[1]['phi'], photons[0]['phi'] )
+            event.l1GammadR   = deltaR( looseLeptons[1], photons[0] )
+            event.mL1Gamma    = ( get4DVec(looseLeptons[1]) + get4DVec(photons[0]) ).M()
+        if len(goodJets) > 0:
+            event.j0GammadPhi = deltaPhi( goodJets[0]['phi'], photons[0]['phi'] )
+            event.j0GammadR   = deltaR( goodJets[0], photons[0] )
+        if len(goodJets) > 1:
+            event.j1GammadPhi = deltaPhi( goodJets[1]['phi'], photons[0]['phi'] )
+            event.j1GammadR   = deltaR( goodJets[1], photons[0] )
+
     event.nPhoton = len(photons)
 
     if len(bJets) > 1:
@@ -574,10 +593,10 @@ def filler( event ):
         if len(photons) > 0:
             event.mllgamma = ( get4DVec(looseLeptons[0]) + get4DVec(looseLeptons[1]) + get4DVec(photons[0]) ).M()
 
-#    if True and len(nonCleandPhotons)>0 and event.nLepton==2 and event.nLeptonVeto==2 and event.nLeptonTight>0 and event.mll>40 and looseLeptons[0]['pdgId']*looseLeptons[1]['pdgId']<0:
-    if False and not event.isTTGamma and event.nElectron==1 and event.nMuon==1 and event.nPhoton>0 and event.nLepton==2 and event.nLeptonVeto==2 and event.nLeptonTight>0 and event.mll>40 and looseLeptons[0]['pdgId']*looseLeptons[1]['pdgId']<0:
+
+    if False and len(photonsCheck) != len(photons) and event.isTTGamma and event.nElectron==1 and event.nMuon==1 and event.nPhoton==0 and event.nLepton==2 and event.nLeptonVeto==2 and event.nLeptonTight>0 and event.mll>40 and looseLeptons[0]['pdgId']*looseLeptons[1]['pdgId']<0:
         print r.event
-    if False and not event.isTTGamma and event.nPhoton>0 and event.nLepton==2 and event.nLeptonVeto==2 and event.nLeptonTight>0 and event.mll>40 and looseLeptons[0]['pdgId']*looseLeptons[1]['pdgId']<0:
+    if False and event.isTTGamma and event.nPhoton>0 and event.nLepton==2 and event.nLeptonVeto==2 and event.nLeptonTight>0 and event.mll>40 and looseLeptons[0]['pdgId']*looseLeptons[1]['pdgId']<0:
         print isIsolatedPhotonPrint( gPart[photons[0]['genPartIdx']], gPart, coneSize=0.2, ptCut=5, excludedPdgIds=[12,-12,14,-14,16,-16] )
 
         print 'iso', GenIsoPhoton
@@ -681,10 +700,6 @@ for ievtRange, eventRange in enumerate( eventRanges ):
     # Clone the empty maker in order to avoid recompilation at every loop iteration
     clonedTree    = reader.cloneTree( branchKeepStrings, newTreename = "Events", rootfile = outputfile )
     clonedEvents += clonedTree.GetEntries()
-    # Add the TTreeFormulas
-    for formula in treeFormulas.keys():
-        treeFormulas[formula]['TTreeFormula'] = ROOT.TTreeFormula( formula, treeFormulas[formula]['string'], clonedTree )
-
     maker = treeMaker_parent.cloneWithoutCompile( externalTree=clonedTree )
 
     maker.start()

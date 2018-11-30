@@ -1,4 +1,3 @@
-# check for nanoAOD
 class triggerSelector:
     def __init__( self, year ):
         if year == 2016:
@@ -31,7 +30,7 @@ class triggerSelector:
         self.MuonEG         = "(%s)"%"||".join( self.em + self.e + self.m )
 
         # define an arbitrary hierarchy
-        self.PDHierarchy = [ "DoubleEG", "DoubleMuon", "MuonEG" ]
+        self.PDHierarchy = [ "DoubleMuon", "DoubleEG", "MuonEG" ]
 
     def __getVeto( self, cutString ):
         return "!%s" %cutString
