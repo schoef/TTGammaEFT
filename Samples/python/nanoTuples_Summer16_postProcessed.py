@@ -51,6 +51,7 @@ dirs['DY_LO']            = ["DYJetsToLL_M10to50_LO", "DYJetsToLL_M50_LO_ext1" ]
 #dirs['DY_HT_LO']         =  DY_M50_HT + DY_M5to50_HT
 
 dirs['TTLep_pow']        = ["TTLep_pow"]
+dirs['TTbar']            = ["TTbar"]
 
 dirs['singleTop']        = ["TBar_tWch_ext", "T_tWch_ext"]#, "TToLeptons_tch_powheg", "TBarToLeptons_tch_powheg"]
 #dirs['singleTop_tch']    = ["T_tch_powheg", "TBar_tch_powheg"]
@@ -59,6 +60,8 @@ dirs['singleTop']        = ["TBar_tWch_ext", "T_tWch_ext"]#, "TToLeptons_tch_pow
 #dirs['Top_pow']          = dirs['TTLep_pow'] + dirs['singleTop']
 
 dirs['TTG']              = ["TTGJets_ext"]
+#dirs['TTG']              = ["TTGLep", "TTGSemiTbar", "TTGSemiT", "TTGHad"]
+dirs['TTGLep']           = ["TTGLep"]
 
 #dirs['TZQ']              = ["tZq_ll_ext"]#, "tZq_nunu_reHLT"]
 #dirs['TWZ']              = ["tWll", "tWnunu"]
@@ -103,6 +106,7 @@ dirs['TTG']              = ["TTGJets_ext"]
 #
 ##dirs['WGToLNuG']     = ["WGToLNuG"]
 dirs['ZGTo2LG']      = ["ZGTo2LG_ext"]
+dirs['ZGToLLG']      = ["ZGToLLG"]
 ##dirs['WGJets']       = ["WGJets"]
 #dirs['ZGJets']       = ["ZGJets"]
 #dirs['ZG']           = dirs['ZGTo2LG'] + dirs['ZGJets']
@@ -113,9 +117,10 @@ directories = { key : [ os.path.join( data_directory, postprocessing_directory, 
 #DY_16              = Sample.fromDirectory(name="DY",               treeName="Events", isData=False, color=color.DY,              texName="DY",                                directory=directories['DY'])
 DY_LO_16           = Sample.fromDirectory(name="DY_LO",            treeName="Events", isData=False, color=color.DY,              texName="DY (LO)",                           directory=directories['DY_LO'])
 #DY_HT_LO_16        = Sample.fromDirectory(name="DY_HT_LO",         treeName="Events", isData=False, color=color.DY,              texName="Drell-Yan",                         directory=directories['DY_HT_LO'])
-TT_pow_16          = Sample.fromDirectory(name="TTLep_pow",        treeName="Events", isData=False, color=color.TTJets,          texName="t#bar{t}",                          directory=directories['TTLep_pow'])
+#TT_pow_16          = Sample.fromDirectory(name="TTLep_pow",        treeName="Events", isData=False, color=color.TTJets,          texName="t#bar{t}",                          directory=directories['TTLep_pow'])
+TTbar              = Sample.fromDirectory(name="TTbar",            treeName="Events", isData=False, color=color.TTJets,          texName="t#bar{t}",                          directory=directories['TTbar'])
 #Top_pow_16         = Sample.fromDirectory(name="Top_pow",          treeName="Events", isData=False, color=color.TTJets,          texName="t#bar{t}/single-t",                 directory=directories['Top_pow'])
-singleTop_16      = Sample.fromDirectory(name="singleTop",        treeName="Events", isData=False, color=color.singleTop,       texName="single-t",                        directory=directories['singleTop'])
+singleTop_16       = Sample.fromDirectory(name="singleTop",        treeName="Events", isData=False, color=color.singleTop,       texName="single-t",                        directory=directories['singleTop'])
 #singleTop_tch_16  = Sample.fromDirectory(name="singleTop_tch",    treeName="Events", isData=False, color=color.singleTop,       texName="single top tch",                    directory=directories['singleTop_tch'])
 #singleTop_sch_16  = Sample.fromDirectory(name="singleTop_sch",    treeName="Events", isData=False, color=color.singleTop,       texName="single top sch",                    directory=directories['singleTop_sch'])
 #TTX_16            = Sample.fromDirectory(name="TTX",              treeName="Events", isData=False, color=color.TTX,             texName="t#bar{t}H/W/Z, tZq",                directory=directories['TTX'])
@@ -123,7 +128,8 @@ singleTop_16      = Sample.fromDirectory(name="singleTop",        treeName="Even
 #TTH_16            = Sample.fromDirectory(name="TTH",              treeName="Events", isData=False, color=color.TTH,             texName="t#bar{t}H",                         directory=directories['TTH'])
 #TTW_16            = Sample.fromDirectory(name="TTW",              treeName="Events", isData=False, color=color.TTW,             texName="t#bar{t}W",                         directory=directories['TTW'])
 #TTZ_16            = Sample.fromDirectory(name="TTZ",              treeName="Events", isData=False, color=color.TTZ,             texName="t#bar{t}Z",                         directory=directories['TTZ'])
-TTG_16            = Sample.fromDirectory(name="TTG",              treeName="Events", isData=False, color=color.TTG,             texName="t#bar{t}#gamma",                    directory=directories['TTG'])
+#TTG_16            = Sample.fromDirectory(name="TTG",              treeName="Events", isData=False, color=color.TTG,             texName="t#bar{t}#gamma",                    directory=directories['TTG'])
+TTGLep            = Sample.fromDirectory(name="TTGLep",           treeName="Events", isData=False, color=color.TTG,             texName="t#bar{t}#gamma",                    directory=directories['TTGLep'])
 #TTZtoLLNuNu_16    = Sample.fromDirectory(name="TTZtoNuNu",        treeName="Events", isData=False, color=color.TTZtoLLNuNu,     texName="t#bar{t}Z (l#bar{l}/#nu#bar{#nu})", directory=directories['TTZtoLLNuNu'])
 #TTZtoQQ_16        = Sample.fromDirectory(name="TTZtoQQ",          treeName="Events", isData=False, color=color.TTZtoQQ,         texName="t#bar{t}Z (q#bar{q})",              directory=directories['TTZtoQQ'])
 #TZQ_16            = Sample.fromDirectory(name="TZQ",              treeName="Events", isData=False, color=color.TZQ,             texName="tZq",                               directory=directories['TZQ'])
@@ -143,6 +149,7 @@ TTG_16            = Sample.fromDirectory(name="TTG",              treeName="Even
 #
 ##WGToLNuG = Sample.fromDirectory(name="WGToLNuG",       treeName="Events", isData=False, color=color.diBoson,       texName="WGToLNuG",                       directory=directories['WGToLNuG'])
 ZGTo2LG  = Sample.fromDirectory(name="ZGTo2LG",       treeName="Events", isData=False, color=color.diBoson,        texName="Z#gamma",                       directory=directories['ZGTo2LG'] )
+ZGToLLG  = Sample.fromDirectory(name="ZGToLLG",       treeName="Events", isData=False, color=color.diBoson,        texName="Z#gamma",                       directory=directories['ZGToLLG'] )
 ##WGJets   = Sample.fromDirectory(name="WGJets",       treeName="Events", isData=False, color=color.diBoson,         texName="WGJets",                       directory=directories['WGJets']  )
 ##ZGJets   = Sample.fromDirectory(name="ZGJets",       treeName="Events", isData=False, color=color.diBoson,         texName="ZGJets",                       directory=directories['ZGJets']  )
 #ZG        = Sample.fromDirectory(name="ZG",            treeName="Events", isData=False, color=color.QCD,             texName="ZG",                           directory=directories['ZG']  )
@@ -171,3 +178,5 @@ signals = []
 #Top_fakes.setSelectionString('!(l1_mcMatchId!=0&&l2_mcMatchId!=0)')
 
 
+#print TTbar.files
+#print len(TTbar.files)

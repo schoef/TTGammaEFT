@@ -22,15 +22,20 @@ except: from TTGammaEFT.Tools.user import postprocessing_directory
 
 logger.info("Loading data samples from directory %s", os.path.join(data_directory, postprocessing_directory))
 
+allSamples = [ 'MuonEG', 'DoubleMuon', 'DoubleEG', 'SingleMuon', 'SingleElectron' ]
+#allSamples = [ 'MuonEG', 'DoubleMuon', 'DoubleEG' ]
+
 dirs = {}
 # no event that passes json in B_ver1
 for ( run, version ) in [ ( 'B', '_ver2' ), ( 'C', '' ), ( 'D', '' ), ( 'E', '' ), ( 'F', '' ), ( 'G', '' ), ( 'H', '_ver2' ), ( 'H', '_ver3' ) ]:
     runTag = 'Run2016' + run + '_05Feb2018' + version
-    dirs[ "DoubleEG_Run2016"   + run + version ] = ["DoubleEG_"   + runTag ]
-    dirs[ "DoubleMuon_Run2016" + run + version ] = ["DoubleMuon_" + runTag ]
-    dirs[ "MuonEG_Run2016"     + run + version ] = ["MuonEG_"     + runTag ]
+    dirs[ "DoubleEG_Run2016"       + run + version ] = ["DoubleEG_"       + runTag ]
+    dirs[ "DoubleMuon_Run2016"     + run + version ] = ["DoubleMuon_"     + runTag ]
+    dirs[ "MuonEG_Run2016"         + run + version ] = ["MuonEG_"         + runTag ]
+    dirs[ "SingleMuon_Run2016"     + run + version ] = ["SingleMuon_"     + runTag ]
+    dirs[ "SingleElectron_Run2016" + run + version ] = ["SingleElectron_" + runTag ]
 
-for pd in [ 'MuonEG', 'DoubleMuon', 'DoubleEG' ]:
+for pd in allSamples:
     merge( pd, 'Run2016BCD',    [ 'Run2016B_ver2', 'Run2016C', 'Run2016D' ], dirs )
     merge( pd, 'Run2016BCDEFG', [ 'Run2016BCD', 'Run2016E', 'Run2016F', 'Run2016G' ], dirs )
     merge( pd, 'Run2016',       [ 'Run2016BCDEFG', 'Run2016H_ver2', 'Run2016H_ver3' ], dirs )
@@ -38,14 +43,17 @@ for pd in [ 'MuonEG', 'DoubleMuon', 'DoubleEG' ]:
 for key in dirs:
     dirs[key] = [ os.path.join( data_directory, postprocessing_directory, dir ) for dir in dirs[key] ]
 
-DoubleEG_Run2016   = getSample( 'DoubleEG',   'Run2016', 35.9*1000, dirs )
-DoubleMuon_Run2016 = getSample( 'DoubleMuon', 'Run2016', 35.9*1000, dirs )
-MuonEG_Run2016     = getSample( 'MuonEG',     'Run2016', 35.9*1000, dirs )
+DoubleEG_Run2016       = getSample( 'DoubleEG',       'Run2016', 35.9*1000, dirs )
+DoubleMuon_Run2016     = getSample( 'DoubleMuon',     'Run2016', 35.9*1000, dirs )
+MuonEG_Run2016         = getSample( 'MuonEG',         'Run2016', 35.9*1000, dirs )
+SingleMuon_Run2016     = getSample( 'SingleMuon',     'Run2016', 35.9*1000, dirs )
+SingleElectron_Run2016 = getSample( 'SingleElectron', 'Run2016', 35.9*1000, dirs )
 
 allSamples_Data25ns  = []
 allSamples_Data25ns += [ MuonEG_Run2016, DoubleEG_Run2016, DoubleMuon_Run2016 ]
+allSamples_Data25ns += [ SingleElectron_Run2016, SingleMuon_Run2016 ]
 
-Run2016      = Sample.combine( "Run2016", [ MuonEG_Run2016, DoubleEG_Run2016, DoubleMuon_Run2016 ], texName = "Data" )
+Run2016      = Sample.combine( "Run2016", allSamples_Data25ns, texName = "Data" )
 Run2016.lumi = (35.9)*1000
 
 for s in allSamples_Data25ns:
