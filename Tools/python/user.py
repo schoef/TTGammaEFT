@@ -18,6 +18,7 @@ if os.environ['USER'] in ['llechner']:
     skim_output_directory               = "/afs/hephy.at/data/llechner01/TTGammaEFT/skims/"
     plot_directory                      = "/afs/hephy.at/user/l/llechner/www/TTGammaEFT/"
     data_directory                      = "/afs/hephy.at/data/llechner01/TTGammaEFT/nanoTuples/"
-    postprocessing_directory            = "TTGammaEFT_PP_2016_TTG_v5/inclusive/"
+    postprocessing_directory            = "TTGammaEFT_PP_2016_TTG_v1/dilep/"
+    postprocessing_directory2017        = "TTGammaEFT_PP_2017_TTG_v4/dilep/"
     postprocessing_output_directory     = "/afs/hephy.at/data/llechner01/TTGammaEFT/nanoTuples/"
     analysis_results                    = results_directory

@@ -17,12 +17,12 @@ special_cuts = {
     "dilepSFSS":         "nLepton==2&&nLeptonTight>=1&&(Lepton_pdgId[0]*Lepton_pdgId[1])>0&&(nElectron==2||nMuon==2)",
     "offZll":            "abs(mll-%s)>15"%(mZ),
     "offZllg":           "abs(mllgamma-%s)>15"%(mZ),
-    "offZSFll":          "((abs(mll-%s)>15&&(nElectron==2||nMuon==2))||(nElectron==1&&nMuon==1))"%(mZ),                             # Cut Z-Window only for SF dilep events
-    "offZSFllg":         "((abs(mllgamma-%s)>15&&(nElectron==2||nMuon==2))||(nElectron==1&&nMuon==1))"%(mZ),   # Cut Z-Window only for SF dilep events
+    "offZSFll":          "((abs(mll-%s)>15&&(nElectron==2||nMuon==2))||(nElectron==1&&nMuon==1))"%(mZ),                      # Cut Z-Window only for SF dilep events
+    "offZSFllg":         "((abs(mllgamma-%s)>15&&(nElectron==2||nMuon==2))||(nElectron==1&&nMuon==1))"%(mZ),                 # Cut Z-Window only for SF dilep events
     "onZll":             "abs(mll-%s)<=15"%(mZ),
     "onZllg":            "abs(mllgamma-%s)<=15"%(mZ),
     "onZSFll":           "((abs(mll-%s)<=15&&(nElectron==2||nMuon==2))||(nElectron==1&&nMuon==1))"%(mZ),                     # Cut Z-Window only for SF dilep events
-    "onZSFllg":          "((abs(mllgamma-%s)<=15&&(nElectron==2||nMuon==2))||(nElectron==1&&nMuon==1))"%(mZ),                     # Cut Z-Window only for SF dilep events
+    "onZSFllg":          "((abs(mllgamma-%s)<=15&&(nElectron==2||nMuon==2))||(nElectron==1&&nMuon==1))"%(mZ),                # Cut Z-Window only for SF dilep events
     "mumu":              "nElectron==0&&nMuon==2",
     "mue":               "nElectron==1&&nMuon==1",
     "ee":                "nElectron==2&&nMuon==0",

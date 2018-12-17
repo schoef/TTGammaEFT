@@ -34,9 +34,26 @@ nanoDataPhotonVars   = [item.split('/')[0] for item in nanoDataPhotonVarString.s
 nanoDataJetVars      = [item.split('/')[0] for item in nanoDataJetVarString.split(',')]
 nanoDataBJetVars     = [item.split('/')[0] for item in nanoDataBJetVarString.split(',')]
 
-photonIdCutBased   = { 'fail':0, 'loose':1, 'medium':2, 'tight':3 }              # NanoAOD Version
-electronIdCutBased = { 'fail':0, 'veto':1,  'loose':2,  'medium':3, 'tight':4 }  # NanoAOD Version
-jetIdBitwise       = { 'fail':0, 'loose':1, 'tight':3 }                          # Bitwise (Jet ID flags bit1 is loose, bit2 is tight -> int(00)=0 == fail, int(01)=1 == loose, int(11)=3 == tight)
+nanoPlotElectronVarString = "eta/F,hoe/F,pfRelIso03_all/F,pfRelIso03_chg/F,phi/F,pt/F,sieie/F,sip3d/F,cutBased/I,pdgId/I,convVeto/O,lostHits/I,eInvMinusPInv/F"
+nanoPlotMuonVarString     = "eta/F,pfRelIso03_all/F,pfRelIso03_chg/F,phi/F,pt/F,sip3d/F,pdgId/I,mediumId/O,eInvMinusPInv/F"
+nanoPlotLeptonVarString   = ','.join( set( nanoPlotElectronVarString.split(',') + nanoPlotMuonVarString.split(',') ) )
+nanoPlotTauVarString      = "eta/F,phi/F,pt/F"
+nanoPlotPhotonVarString   = "eta/F,hoe/F,pfRelIso03_all/F,pfRelIso03_chg/F,phi/F,pt/F,sieie/F,cutBased/I,pdgId/I,electronVeto/O,pixelSeed/O"
+nanoPlotJetVarString      = "btagCSVV2/F,btagDeepB/F,chEmEF/F,chHEF/F,eta/F,neEmEF/F,neHEF/F,phi/F,pt/F,nConstituents/I,jetId/I"
+nanoPlotBJetVarString     = 'pt/F,eta/F,phi/F'
+
+nanoPlotElectronVars = [item.split('/')[0] for item in nanoPlotElectronVarString.split(',')]
+nanoPlotMuonVars     = [item.split('/')[0] for item in nanoPlotMuonVarString.split(',')]
+nanoPlotLeptonVars   = [item.split('/')[0] for item in nanoPlotLeptonVarString.split(',')]
+nanoPlotTauVars      = [item.split('/')[0] for item in nanoPlotTauVarString.split(',')] 
+nanoPlotPhotonVars   = [item.split('/')[0] for item in nanoPlotPhotonVarString.split(',')]
+nanoPlotJetVars      = [item.split('/')[0] for item in nanoPlotJetVarString.split(',')]
+nanoPlotBJetVars     = [item.split('/')[0] for item in nanoPlotBJetVarString.split(',')]
+
+photonIdCutBasedBitmap = {                       'loose':1, 'medium':2, 'tight':4 }  # NanoAOD Version ID bitmap, 2^(0:loose, 1:medium, 2:tight)
+photonIdCutBased       = { 'fail':0,             'loose':1, 'medium':2, 'tight':3 }  # NanoAOD Version
+electronIdCutBased     = { 'fail':0,  'veto':1,  'loose':2, 'medium':3, 'tight':4 }  # NanoAOD Version
+jetIdBitwise           = { 'fail':0,             'loose':1,             'tight':3 }  # Bitwise (Jet ID flags bit1 is loose, bit2 is tight -> int(00)=0 == fail, int(01)=1 == loose, int(11)=3 == tight)
 
 # General Selection Functions
 def particlePtEtaSelection( collection, ptCut=10, absEtaCut=2.4 ):
@@ -94,7 +111,7 @@ def getGoodLeptons(c, eleSelector, muonSelector, eleCollVars=nanoElectronVars, e
 def isBJet( j, tagger='DeepCSV', year=2016 ):
     if tagger == 'CSVv2':
         if year == 2016:
-            # https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation80XReReco
+            # https://twiki.cern.ch/twikix/bin/viewauth/CMS/BtagRecommendation80XReReco
             return j['btagCSVV2'] > 0.8484 
         elif year == 2017:
             # https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation94X
@@ -116,6 +133,11 @@ def filterBJets( jets, tagger = 'DeepCSV', year = 2016 ):
     bJets.sort( key = lambda j: -j['pt'] )
     return bJets
 
+def filterNonBJets( jets, tagger = 'DeepCSV', year = 2016 ):
+    nonBJets = list( filter( lambda j: not isBJet(j, tagger = tagger, year = year), jets ) )
+    nonBJets.sort( key = lambda j: -j['pt'] )
+    return nonBJets
+
 def vertexSelector( l ):
     if abs(l["dxy"]) >= 0.05: return False
     if abs(l["dz"])  >= 0.1:  return False
@@ -128,7 +150,8 @@ def vertexSelector( l ):
 #    return True
 
 def photonIDSelector( p ):
-    # still missing: relIso_neutral, relIso_photon  (should be in medium cutbased ID)
+    # still missing: relIso_neutral, relIso_photon
+    # (should be medium cutbased ID, however is not!)
     EC = abs(p["eta"]) > 1.479
     if p["hoe"]              >= (0.0396-0.0177*EC):   return False
     if p["sieie"]            >= (0.01022+0.01979*EC): return False
@@ -147,23 +170,32 @@ def triggerEmulatorSelector( l ):
     return True
 
 def barrelEndcapVeto( p ):
-    return ( abs(p["eta"]) > 1.556 or abs(p["eta"]) <= 1.4442 )
+    if abs(p['pdgId']) == 11: absEta = abs(p["eta"] + p["deltaEtaSC"])   # eta supercluster
+    else:                     absEta = abs(p["eta"])                     # eta
+    return ( absEta > 1.556 or absEta <= 1.4442 )
 
 # Reco Selectors
-def jetSelector():
+def jetSelector( jet_selection ):
     # According to AN-2017/197
     # hadron multiplicity > 0 still missing
-    def func(j):
-        if j["pt"]            <= 30:           return False
-        if abs(j["eta"])      >= 2.4:          return False
-        if j["nConstituents"]  < 2:            return False
-        if j["neHEF"]         >= 0.99:         return False
-        if j["neEmEF"]        >= 0.99:         return False
-        if j["chEmEF"]        >= 0.99:         return False
-        if j["chHEF"]         <= 0.:           return False
-        if j["jetId"] < jetIdBitwise['loose']: return False
-        return True
-    return func
+    if jet_selection == 'loose':
+        def func(j):
+            if j["pt"]            <= 30:           return False
+            if abs(j["eta"])      >= 2.4:          return False
+            if j["nConstituents"]  < 2:            return False
+            if j["neHEF"]         >= 0.99:         return False
+            if j["neEmEF"]        >= 0.99:         return False
+            if j["chEmEF"]        >= 0.99:         return False
+            if j["chHEF"]         <= 0.:           return False
+            if j["jetId"] < jetIdBitwise['loose']: return False
+            return True
+        return func
+    elif jet_selection == 'basic':
+        def func(j):
+            if j["pt"]            <= 30:           return False
+            if abs(j["eta"])      >= 2.4:          return False
+            return True
+        return func
 
 def muonSelector( lepton_selection ):
     # According to AN-2017/197
@@ -179,7 +211,7 @@ def muonSelector( lepton_selection ):
             return True
         return func
 
-    if lepton_selection == 'loose':
+    elif lepton_selection == 'loose':
         def func(l):
             if l["pt"]             <= 15:   return False
             if abs(l["eta"])       >= 2.4:  return False
@@ -200,30 +232,39 @@ def muonSelector( lepton_selection ):
             return True
         return func
 
+    elif lepton_selection == 'basic':
+        def func(l):
+            if l["pt"]             <= 15:   return False
+            if abs(l["eta"])       >= 2.4:  return False
+            return True
+        return func
+
 # electrons 
 def eleSelector( lepton_selection, year=2016 ):
     # According to AN-2017/197
     # still missing: MVA
-    idVar = "cutBased" if year==2016 else "cutBasedBitmap"
+    idVar = "cutBased"
     if lepton_selection == 'tight':
         def func(l):
             if l["pt"]             <= 25:              return False
             if abs(l["eta"])       >= 2.4:             return False
+            if not barrelEndcapVeto(l):                return False
             if l['pfRelIso03_all'] >= 0.12:            return False
             if l["sip3d"]          >= 4:               return False
             if ord(l["lostHits"])  != 0:               return False
             if not l["convVeto"]:                      return False
             if not vertexSelector(l):                  return False
             if not triggerEmulatorSelector(l):         return False
-#            if l[idVar] < electronIdCutBased['medium']: return False
-            if l[idVar] < electronIdCutBased['loose']: return False
+#            if l[idVar] < electronIdCutBased['tight']: return False
+            if l[idVar] < electronIdCutBased['medium']: return False
             return True
         return func
 
-    if lepton_selection == 'loose':
+    elif lepton_selection == 'loose':
         def func(l):
             if l["pt"]             <= 15:              return False
             if abs(l["eta"])       >= 2.4:             return False
+            if not barrelEndcapVeto(l):                return False
             if l['pfRelIso03_all'] >= 0.12:            return False
             if l["sip3d"]          >= 4:               return False
             if ord(l["lostHits"])  != 0:               return False
@@ -231,7 +272,7 @@ def eleSelector( lepton_selection, year=2016 ):
             if not vertexSelector(l):                  return False
             if not triggerEmulatorSelector(l):         return False
 #            if l[idVar] < electronIdCutBased['medium']: return False
-            if l[idVar] < electronIdCutBased['loose']: return False
+            if l[idVar] < electronIdCutBased['medium']: return False
             return True
         return func
 
@@ -239,10 +280,18 @@ def eleSelector( lepton_selection, year=2016 ):
         def func(l):
             if l["pt"]             <= 15:              return False
             if abs(l["eta"])       >= 2.4:             return False
+            if not barrelEndcapVeto(l):                return False
             if l['pfRelIso03_all'] >= 0.4:             return False
             if l["sip3d"]          >= 4:               return False
             if not vertexSelector(l):                  return False
             if l[idVar] < electronIdCutBased['veto']:  return False
+            return True
+        return func
+
+    elif lepton_selection == 'basic':
+        def func(l):
+            if l["pt"]             <= 15:              return False
+            if abs(l["eta"])       >= 2.4:             return False
             return True
         return func
 
@@ -254,16 +303,24 @@ def tauSelector( lepton_selection ):
 
 def photonSelector( selection, year=2016 ):
     # According to AN-2017/197
-    idVar = "cutBased" if year==2016 else "cutBasedBitmap"
+    idVar    = "cutBased" if year==2016 else "cutBasedBitmap"
+    photonId = photonIdCutBased if year==2016 else photonIdCutBasedBitmap
     if selection == 'medium':
         def func(g):
-            if g["pt"]       <= 20:                   return False
-            if abs(g["eta"]) >= 1.479:                return False
-            if g["pixelSeed"]:                        return False
-#            if not barrelEndcapVeto(g):               return False
-            if not photonIDSelector(g):               return False
-            if not g["electronVeto"]:                 return False
-            if g[idVar] < photonIdCutBased['medium']: return False
+            if g["pt"]       <= 20:           return False
+            if abs(g["eta"]) >= 1.479:        return False
+            if g["pixelSeed"]:                return False
+            if not barrelEndcapVeto(g):       return False
+            if not photonIDSelector(g):       return False
+            if not g["electronVeto"]:         return False
+            if g[idVar] < photonId['medium']: return False
+            return True
+        return func
+
+    elif selection == 'basic':
+        def func(g):
+            if g["pt"]       <= 13:           return False
+            if abs(g["eta"]) >= 1.479:        return False
             return True
         return func
 
@@ -355,27 +412,32 @@ def filterGenBJets( genJets ):
 #  1: stage of event generation inside PYTHIA
 # 22: intermediate (intended to have preserved mass) (tops)
 
-# check for nanoAOD
 def getFilterCut( isData=False, isFastSim=False, year=2016, ignoreJSON=False ):
     if isFastSim:
         filters             = [ "Flag_goodVertices" ]
     elif year == 2016:
-        filters             = [ "Flag_goodVertices", "Flag_HBHENoiseIsoFilter", "Flag_HBHENoiseFilter" ]
-        filters            += [ "Flag_globalTightHalo2016Filter", "Flag_EcalDeadCellTriggerPrimitiveFilter" ]
-#        filters            += [ "Flag_badChargedHadronSummer2016", "Flag_badMuonSummer2016" ]
-        filters            += [ "Flag_muonBadTrackFilter", "Flag_chargedHadronTrackResolutionFilter" ]
-#        filters            += [ "Flag_METFilters" ]
+        filters             = [ "Flag_goodVertices" ]
+        filters            += [ "Flag_HBHENoiseFilter" ]
+        filters            += [ "Flag_HBHENoiseIsoFilter" ]
+        filters            += [ "Flag_globalSuperTightHalo2016Filter" ]
+        filters            += [ "Flag_EcalDeadCellTriggerPrimitiveFilter" ]
+#        filters            += [ "Flag_BadPFMuonFilter" ]
+#        filters            += [ "Flag_BadChargedCandidateFilter" ]
         if isData:
             filters        += [ "Flag_eeBadScFilter" ]
     elif year == 2017:
-        filters             = [ "Flag_goodVertices", "Flag_globalTightHalo2016Filter" ]
-        filters            += [ "Flag_HBHENoiseFilter", "Flag_HBHENoiseIsoFilter" ]
-        filters            += [ "Flag_EcalDeadCellTriggerPrimitiveFilter", "Flag_BadPFMuonFilter", "Flag_BadChargedCandidateFilter", "Flag_ecalBadCalibFilter" ]
+        filters             = [ "Flag_goodVertices" ]
+        filters            += [ "Flag_HBHENoiseFilter" ]
+        filters            += [ "Flag_HBHENoiseIsoFilter" ]
+        filters            += [ "Flag_globalSuperTightHalo2016Filter" ]
+        filters            += [ "Flag_EcalDeadCellTriggerPrimitiveFilter" ]
+        filters            += [ "Flag_BadPFMuonFilter" ]
+        filters            += [ "Flag_BadChargedCandidateFilter" ]
+#        filters            += [ "ecalBadCalibReducedMINIAODFilter" ]
         if isData:
             filters        += [ "Flag_eeBadScFilter" ]
     if isData:
-        filters += [ "weight>0" ]
+        filters            += [ "weight>0" ]
         if not ignoreJSON:
-            filters += [ "jsonPassed>0" ]
+            filters        += [ "jsonPassed>0" ]
     return "&&".join(filters)
-
