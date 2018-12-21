@@ -127,7 +127,7 @@ isolationGood.append( Plot(
     name      = 'dRbb',
     texX      = '#DeltaR(bb)',
     texY      = 'Number of Events',
-    attribute = lambda event, sample: event.bbdR if event.nBTag >= 2 else defaultValue,
+    attribute = lambda event, sample: event.bbdR if event.nBTagGood >= 2 else defaultValue,
     binning   = [ 40, 0, 4 ],
 ))
 
@@ -135,6 +135,6 @@ isolationGood.append( Plot(
     name      = 'dPhibb',
     texX      = '#Delta#phi(bb)',
     texY      = 'Number of Events',
-    attribute = lambda event, sample: event.bbdPhi if event.nBTag >= 2 else defaultValue,
+    attribute = lambda event, sample: event.bbdPhi if event.nBTagGood >= 2 else defaultValue,
     binning   = [ 40, 0, pi ],
 ))

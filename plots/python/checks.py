@@ -34,6 +34,6 @@ checks.append( Plot(
     name      = 'gamma0_category',
     texX      = 'Category_{#gamma_{0}}',
     texY      = 'Number of Events',
-    attribute = lambda event, sample: event.Photon_photonCat[0],
+    attribute = lambda event, sample: event.Photon_photonCat[0] in event.nPhoton > 0 else defaultValue,
     binning   = [ 4, 0, 4 ],
 ))

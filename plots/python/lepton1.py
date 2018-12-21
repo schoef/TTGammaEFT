@@ -23,11 +23,27 @@ lepton1.append( Plot(
 ))
 
 lepton1.append( Plot(
+    name      = 'l1_eta_tight',
+    texX      = '#eta(l_{1})',
+    texY      = 'Number of Events',
+    attribute = lambda event, sample: event.Lepton_eta[1] if event.nLepton > 1 else defaultValue,
+    binning   = [ 30, -3, 3 ],
+))
+
+lepton1.append( Plot(
     name      = 'l1_eta',
     texX      = '#eta(l_{1})',
     texY      = 'Number of Events',
     attribute = lambda event, sample: event.Lepton_eta[1] if event.nLepton > 1 else defaultValue,
     binning   = [ 30, -4, 4 ],
+))
+
+lepton1.append( Plot(
+    name      = 'l1_absEta_tight',
+    texX      = '|#eta|(l_{1})',
+    texY      = 'Number of Events',
+    attribute = lambda event, sample: abs(event.Lepton_eta[1]) if event.nLepton > 1 else defaultValue,
+    binning   = [ 15, 0, 3 ],
 ))
 
 lepton1.append( Plot(

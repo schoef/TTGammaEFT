@@ -31,11 +31,27 @@ jet0.append( Plot(
 ))
 
 jet0.append( Plot(
+    name      = 'jet0_eta_tight',
+    texX      = '#eta(jet_{0})',
+    texY      = 'Number of Events',
+    attribute = lambda event, sample: event.Jet_eta[0] if event.nJet > 0 else defaultValue,
+    binning   = [ 20, -3, 3 ],
+))
+
+jet0.append( Plot(
     name      = 'jet0_eta',
     texX      = '#eta(jet_{0})',
     texY      = 'Number of Events',
     attribute = lambda event, sample: event.Jet_eta[0] if event.nJet > 0 else defaultValue,
     binning   = [ 20, -5, 5 ],
+))
+
+jet0.append( Plot(
+    name      = 'jet0_absEta_tight',
+    texX      = '|#eta|(jet_{0})',
+    texY      = 'Number of Events',
+    attribute = lambda event, sample: abs(event.Jet_eta[0]) if event.nJet > 0 else defaultValue,
+    binning   = [ 10, 0, 3 ],
 ))
 
 jet0.append( Plot(

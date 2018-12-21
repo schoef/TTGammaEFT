@@ -15,6 +15,14 @@ from TTGammaEFT.Tools.constants       import defaultValue
 met = []
     
 met.append( Plot(
+    name      = 'MET_pt_loose',
+    texX      = 'E^{miss}_{T} (GeV)',
+    texY      = 'Number of Events / 40 GeV',
+    attribute = lambda event, sample: event.MET_pt,
+    binning   = [ 20, 0, 800 ],
+))
+
+met.append( Plot(
     name      = 'MET_pt',
     texX      = 'E^{miss}_{T} (GeV)',
     texY      = 'Number of Events / 20 GeV',
