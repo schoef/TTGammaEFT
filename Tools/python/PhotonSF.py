@@ -11,14 +11,25 @@ logger = logging.getLogger(__name__)
 class PhotonSF:
     def __init__(self, year=2016):
 
-        self.year    = year
-        self.dataDir = "$CMSSW_BASE/src/TTGammaEFT/Tools/data/photonSFData"
+        if year not in [ 2016, 2017, 2018 ]:
+            raise Exception("Lepton SF for year %i not known"%year)
 
-        if self.year == 2016:
-            g_file = self.dataDir + '/2016LegacyReReco_PhotonCutBasedMedium.root'
+        self.year    = year
+        self.dataDir = "$CMSSW_BASE/src/TTGammaEFT/Tools/data/photonSFData/"
+
+        if year == 2016:
+            g_file = 'g2016_LegacyReReco_PhotonCutBasedMedium.root'
             g_key  = "EGamma_SF2D"
 
-        self.g_sf = getObjFromFile( os.path.expandvars(g_file), g_key)
+        elif year == 2017:
+            g_file = 'g2017_PhotonsMedium.root'
+            g_key  = "EGamma_SF2D"
+
+        elif year == 2018:
+            g_file = 'g2018_PhotonsMedium.root'
+            g_key  = "EGamma_SF2D"
+
+        self.g_sf = getObjFromFile( os.path.expandvars( os.path.join( self.dataDir, g_file ) ), g_key )
         assert self.g_sf, "Could not load gamma SF histo %s from file %s."%( g_key, g_file )
 
         self.g_ptMax = self.g_sf.GetYaxis().GetXmax()
@@ -28,11 +39,11 @@ class PhotonSF:
         self.g_etaMin = self.g_sf.GetXaxis().GetXmin()
 
     def getSF(self, pt, eta, sigma=0):
-        if not (eta <= self.g_etaMax):
-            logger.warning( "Supercluster eta out of bounds: %3.2f (need %3.2f <= eta <=% 3.2f)", eta, self.g_etaMin, self.g_etaMax )
+        if eta >= self.g_etaMax:
+            logger.warning( "Photon eta out of bounds: %3.2f (need %3.2f <= eta <=% 3.2f)", eta, self.g_etaMin, self.g_etaMax )
             eta = self.g_etaMax-0.01
-        if not (eta >= self.g_etaMin):
-            logger.warning( "Supercluster eta out of bounds: %3.2f (need %3.2f <= eta <=% 3.2f)", eta, self.g_etaMin, self.g_etaMax )
+        if eta <= self.g_etaMin:
+            logger.warning( "Photon eta out of bounds: %3.2f (need %3.2f <= eta <=% 3.2f)", eta, self.g_etaMin, self.g_etaMax )
             eta = self.g_etaMin+0.01
 
         if   pt >= self.g_ptMax: pt = self.g_ptMax - 1
