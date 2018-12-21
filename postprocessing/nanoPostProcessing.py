@@ -286,7 +286,7 @@ if sample.isData:
     lumiList = LumiList( os.path.expandvars( sample.json ) )
     logger.info( "Loaded json %s", sample.json )
 else:
-    lumiScaleFactor = 1#xSection * targetLumi / float( sample.normalization ) if xSection is not None else None
+    lumiScaleFactor = xSection * targetLumi / float( sample.normalization ) if xSection is not None else None
     branchKeepStrings = branchKeepStrings_DATAMC + branchKeepStrings_MC
 
 if sample.isData:
@@ -719,8 +719,8 @@ def filler( event ):
             event.j1GammadPhi = deltaPhi( looseJets[1]['phi'], mediumPhotons[0]['phi'] )
             event.j1GammadR   = deltaR( looseJets[1], mediumPhotons[0] )
 
-    fill_vector_collection( event, "Photon",     nanoPhotonVars + ['photonCat'] if isMC else nanoPhotonVars, allPhotons )
-    fill_vector_collection( event, "PhotonGood", nanoPhotonVars + ['photonCat'] if isMC else nanoPhotonVars, mediumPhotons )
+    fill_vector_collection( event, "Photon",     nanoPhotonVars,                                                                        allPhotons    )
+    fill_vector_collection( event, "PhotonGood", nanoPhotonVars + ['photonCat'] if isMC and len(mediumPhotons) > 0 else nanoPhotonVars, mediumPhotons )
     event.nPhoton     = len( allPhotons )
     event.nPhotonGood = len( mediumPhotons )
 
