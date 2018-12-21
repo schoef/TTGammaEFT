@@ -54,10 +54,10 @@ if args.onlyTTG:         args.plot_directory += "_onlyTTG"
 if args.normalize:       args.plot_directory += "_normalize"
 
 # 2017 Samples
-postprocessing_directory = "TTGammaEFT_PP_2017_TTG_v4/dilep/"
+postprocessing_directory = "TTGammaEFT_PP_2017_TTG_v5/dilep/"
 #from TTGammaEFT.Samples.nanoTuples_Summer16_postProcessed    import *
 if not args.noData:
-    postprocessing_directory = "TTGammaEFT_PP_2017_TTG_v4/dilep/"
+    postprocessing_directory = "TTGammaEFT_PP_2017_TTG_v5/dilep/"
     from TTGammaEFT.Samples.nanoTuples_Run2017_31Mar2018_postProcessed import *
 
 # Text on the plots
@@ -117,17 +117,22 @@ def getYieldPlot( index ):
 
 # Read variables and sequences
 read_variables  = ["weight/F", "ref_weight/F",
-                   "PV_npvs/F", "PV_npvsGood/F",
-                   "nJet/I", "nAllJet/I", "nBTag/I",
-                   "nJetGood/I",
+                   "PV_npvs/I", "PV_npvsGood/I",
+                   "nJet/I", "nBTag/I",
+                   "nJetGood/I", "nBTagGood/I",
                    "Jet[%s]"         %nanoPlotJetVarString,
-                   "nLepton/I", "nLeptonTight/I", "nLeptonVeto/I", "nElectron/I", "nMuon/I",
-                   "nLeptonGood/I", "nElectronGood/I", "nMuonGood/I",
+                   "JetGood[%s]"         %nanoPlotJetVarString,
+                   "nLeptonGood/I", "nLeptonTight/I", "nLeptonVeto/I", "nElectronGood/I", "nMuonGood/I",
+                   "nLepton/I", "nElectron/I", "nMuon/I",
+                   "Lepton[%s]"      %nanoPlotLeptonVarString,
                    "LeptonGood[%s]"      %nanoPlotLeptonVarString,
                    "nPhoton/I",
                    "nPhotonGood/I",
                    "Photon[%s]"      %(nanoPlotPhotonVarString.replace('cutBased','cutBasedBitmap')),
-                   "MET_pt/F", "MET_phi/F", "METSig/F", "ht/F",
+                   "PhotonGood[%s]"      %(nanoPlotPhotonVarString.replace('cutBased','cutBasedBitmap')),
+                   "METSig/F", "ht/F",
+                   "METSigGood/F", "htGood/F",
+                   "MET_pt/F", "MET_phi/F",
                    "mll/F", "mllgamma/F",
                    "m3/F", "m3wBJet/F",
                    "lldR/F", "lldPhi/F", "bbdR/F", "bbdPhi/F",
@@ -147,6 +152,7 @@ read_variables += [ 'Bj1_' + var for var in nanoPlotBJetVarString.split(',') ]
 read_variables_MC = [\
                      "isTTGamma/I", "isZGamma/I",
                      "Photon[photonCat/I]",
+                     "PhotonGood[photonCat/I]",
 #                     "GenElectron[%s]" %nanoGenVarString,
 #                     "GenMuon[%s]"     %nanoGenVarString,
 #                     "GenPhoton[%s]"   %nanoGenVarString,
