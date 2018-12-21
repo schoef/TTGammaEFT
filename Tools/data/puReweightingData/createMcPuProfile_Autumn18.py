@@ -36,7 +36,7 @@ PUprofile = [\
             ]
 
 file = ROOT.TFile("MCProfile_Autumn18.root","NEW")
-hist = ROOT.TH1F( "pileup", "pileup", len(bins), min(bins), max(bins) )
+hist = ROOT.TH1F( "pileup", "pileup", len(bins), min(bins), max(bins)+1 )
 for i, bin in enumerate(bins): hist.SetBinContent( hist.GetBin(bin), PUprofile[i] )
 
 hist.Write("pileup")

@@ -25,12 +25,24 @@ def toFlavourKey(pdgId):
     if abs(pdgId)==4: return ROOT.BTagEntry.FLAV_C
     return ROOT.BTagEntry.FLAV_UDSG
 
-#Method 1ab
-effFile          = '$CMSSW_BASE/src/TTGammaEFT/Tools/data/btagEfficiencyData/TTLep_pow_Moriond17_2j_2l.pkl'
-#effFile          = '$CMSSW_BASE/src/TTGammaEFT/Tools/data/btagEfficiencyData/TTJets_DiLepton_comb_2j_2l.pkl'
 
-sfFile           = '$CMSSW_BASE/src/TTGammaEFT/Tools/data/btagEfficiencyData/CSVv2_Moriond17_B_H.csv'
-sfFile_FastSim   = '$CMSSW_BASE/src/TTGammaEFT/Tools/data/btagEfficiencyData/fastsim_csvv2_ttbar_26_1_2017.csv'
+#Method 1ab
+effFile2016      = 'TTLep_pow_Moriond17_2j_2l.pkl'
+effFile2017      = 'TTLep_pow_Moriond17_2j_2l.pkl'
+effFile2018      = 'TTLep_pow_Moriond17_2j_2l.pkl'
+#effFile          = 'TTJets_DiLepton_comb_2j_2l.pkl'
+sfFile_FastSim   = 'fastsim_csvv2_ttbar_26_1_2017.csv'
+
+# Not working with 2017/2018 for now
+# Not working with deepCSV for now
+sfFile2016DeepCSV = 'b2016_DeepCSV_Moriond17_B_H.csv'
+sfFile2017DeepCSV = 'b2017_DeepCSV_94XSF_V3_B_F.csv'
+sfFile2018DeepCSV = 'b2017_DeepCSV_94XSF_V3_B_F.csv'
+
+sfFile2016CSVv2 = 'b2016_CSVv2_Moriond17_B_H.csv'
+sfFile2017CSVv2 = 'b2017_CSVv2_94XSF_V2_B_F.csv'
+sfFile2018CSVv2 = 'b2017_CSVv2_94XSF_V2_B_F.csv'
+
 
 class BTagEfficiency:
 
@@ -72,7 +84,14 @@ class BTagEfficiency:
                 return 1
 
 
-    def __init__(self,  WP=ROOT.BTagEntry.OP_MEDIUM, fastSim=False):
+    def __init__( self, WP=ROOT.BTagEntry.OP_MEDIUM, fastSim=False, year=2016, tagger='CSVv2' ):
+
+        if year not in [ 2016, 2017, 2018 ]:
+            raise Exception("Lepton SF for year %i not known"%year)
+
+        self.dataDir = "$CMSSW_BASE/src/TTGammaEFT/Tools/data/btagEfficiencyData/"
+        self.year = year
+        self.tagger = tagger
 
         # Whether or not FS SF are to be used
         self.fastSim = fastSim
@@ -83,14 +102,40 @@ class BTagEfficiency:
             self.btagWeightNames += [ 'SF_FS_Up', 'SF_FS_Down']
 
         # Input files
-        self.scaleFactorFile   = sfFile
-        self.scaleFactorFileFS = sfFile_FastSim
-        self.mcEfficiencyFile  = effFile
+        if year == 2016:
+            if tagger == 'CSVv2':
+                self.scaleFactorFile   = os.path.expandvars( os.path.join( self.dataDir, sfFile2016CSVv2 ) )
+                self.scaleFactorFileFS = os.path.expandvars( os.path.join( self.dataDir, sfFile_FastSim ) )
+                self.mcEfficiencyFile  = os.path.expandvars( os.path.join( self.dataDir, effFile2016 ) )
+            elif tagger == 'DeepCSV':
+                self.scaleFactorFile   = os.path.expandvars( os.path.join( self.dataDir, sfFile2016DeepCSV ) )
+                self.scaleFactorFileFS = os.path.expandvars( os.path.join( self.dataDir, sfFile_FastSim ) )
+                self.mcEfficiencyFile  = os.path.expandvars( os.path.join( self.dataDir, effFile2016 ) )
 
-        logger.info ( "Loading scale factors from %s", os.path.expandvars(self.scaleFactorFile) )
-        ROOT.gSystem.Load('libCondFormatsBTauObjects') 
-        ROOT.gSystem.Load('libCondToolsBTau')
-        self.calib = ROOT.BTagCalibration("csvv2", os.path.expandvars(self.scaleFactorFile) )
+        if year == 2017:
+            if tagger == 'CSVv2':
+                self.scaleFactorFile   = os.path.expandvars( os.path.join( self.dataDir, sfFile2017CSVv2 ) )
+                self.scaleFactorFileFS = os.path.expandvars( os.path.join( self.dataDir, sfFile_FastSim ) )
+                self.mcEfficiencyFile  = os.path.expandvars( os.path.join( self.dataDir, effFile2017 ) )
+            elif tagger == 'DeepCSV':
+                self.scaleFactorFile   = os.path.expandvars( os.path.join( self.dataDir, sfFile2017DeepCSV ) )
+                self.scaleFactorFileFS = os.path.expandvars( os.path.join( self.dataDir, sfFile_FastSim ) )
+                self.mcEfficiencyFile  = os.path.expandvars( os.path.join( self.dataDir, effFile2017 ) )
+
+        if year == 2018:
+            if tagger == 'CSVv2':
+                self.scaleFactorFile   = os.path.expandvars( os.path.join( self.dataDir, sfFile2018CSVv2 ) )
+                self.scaleFactorFileFS = os.path.expandvars( os.path.join( self.dataDir, sfFile_FastSim ) )
+                self.mcEfficiencyFile  = os.path.expandvars( os.path.join( self.dataDir, effFile2018 ) )
+            elif tagger == 'DeepCSV':
+                self.scaleFactorFile   = os.path.expandvars( os.path.join( self.dataDir, sfFile2018DeepCSV ) )
+                self.scaleFactorFileFS = os.path.expandvars( os.path.join( self.dataDir, sfFile_FastSim ) )
+                self.mcEfficiencyFile  = os.path.expandvars( os.path.join( self.dataDir, effFile2018 ) )
+
+        logger.info ( "Loading scale factors from %s", self.scaleFactorFile )
+        ROOT.gSystem.Load( 'libCondFormatsBTauObjects' ) 
+        ROOT.gSystem.Load( 'libCondToolsBTau' )
+        self.calib = ROOT.BTagCalibration( "csvv2", self.scaleFactorFile )
 
         # Get readers
         #recommended measurements for different jet flavours given here: https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation80X#Data_MC_Scale_Factors
@@ -103,16 +148,16 @@ class BTagEfficiency:
         self.reader.load(self.calib, 2, "incl")
 
         if fastSim:
-            logger.info( "Loading FullSim/FastSim scale factors from %s", os.path.expandvars( self.scaleFactorFileFS ) )
-            self.calibFS = ROOT.BTagCalibration("csv", os.path.expandvars( self.scaleFactorFileFS ) )
+            logger.info( "Loading FullSim/FastSim scale factors from %s", self.scaleFactorFileFS )
+            self.calibFS = ROOT.BTagCalibration("csv", self.scaleFactorFileFS )
             self.readerFS = ROOT.BTagCalibrationReader(WP, "central", v_sys)
             self.readerFS.load(self.calibFS, 0, "fastsim")
             self.readerFS.load(self.calibFS, 1, "fastsim")
             self.readerFS.load(self.calibFS, 2, "fastsim")
 
         # Load MC efficiency
-        logger.info( "Loading MC efficiency %s", os.path.expandvars(self.mcEfficiencyFile) )
-        self.mcEff = pickle.load(file(os.path.expandvars(self.mcEfficiencyFile)))
+        logger.info( "Loading MC efficiency %s", self.mcEfficiencyFile )
+        self.mcEff = pickle.load( file( self.mcEfficiencyFile ) )
 
     def getMCEff(self, pdgId, pt, eta):
         ''' Get MC efficiency for jet
@@ -195,7 +240,7 @@ class btagEfficiency_1d:
         self.btagWeightNames = reduce(or_, flavourSys_1d.values())
 
         self.scaleFactorFile = sfFile_1d
-        logger.info( "Loading scale factors from %s", os.path.expandvars(self.scaleFactorFile) )
-        self.calib = ROOT.BTagCalibration("csvv2", os.path.expandvars(self.scaleFactorFile))
+        logger.info( "Loading scale factors from %s", self.scaleFactorFile )
+        self.calib = ROOT.BTagCalibration("csvv2", self.scaleFactorFile )
         self.readers = {sys: ROOT.BTagCalibrationReader(self.calib, ROOT.BTagEntry.OP_RESHAPING, "iterativefit", sys) for sys in self.btagWeightNames}
 

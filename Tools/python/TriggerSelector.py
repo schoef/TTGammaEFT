@@ -66,6 +66,9 @@ class TriggerSelector:
     def __getVeto( self, cutString ):
         return "!%s" %cutString
 
+    def getAllTrigger( self ):
+        return self.mm + self.m + self.ee + self.e + self.em
+
     def getSelection( self, PD ):
         found     = False
         cutString = ""

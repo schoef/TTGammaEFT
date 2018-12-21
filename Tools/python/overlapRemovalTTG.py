@@ -12,19 +12,6 @@ def isIsolatedPhoton( g, genparts, coneSize=0.2, ptCut=5, excludedPdgIds=[] ):
         return False
     return True
 
-def isIsolatedPhotonPrint( g, genparts, coneSize=0.2, ptCut=5, excludedPdgIds=[] ):
-    for other in genparts:
-        if other['pdgId']              == 22:       continue   # Avoid photon or generator copies of it
-        if other['pdgId'] in excludedPdgIds:        continue   # Avoid particles you don't want to consider (e.g. neutrinos)
-        if abs( other['pt'] - g['pt'] ) < 0.0001:   continue   # Same particle
-        if other['status']             != 1:        continue   # Only final state particles
-        if other['pt']                  < ptCut:    continue   # pt > 5
-        if deltaR( g, other )           > coneSize: continue   # check deltaR
-        print 'not isolated, deltaR = ', deltaR( g, other )
-        print 'closest gen particle: ', other
-        return False
-    return True
-
 # Run through parents in genparticles, and return list of their pdgId
 def getParentIds( g, genParticles ):
   parents = []
@@ -32,7 +19,6 @@ def getParentIds( g, genParticles ):
   if g['genPartIdxMother'] > 0:
     try:
         mother1 = genParticles[g['genPartIdxMother']]
-#        if not mother['pdgId'] == g['pdgId']:
         parents += [mother1['pdgId']] + getParentIds( mother1, genParticles )
     except:
         # when no 'status' selection is made for g, this can run in a kind of endless-loop, then python throws an Exception

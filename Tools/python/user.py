@@ -22,3 +22,4 @@ if os.environ['USER'] in ['llechner']:
     postprocessing_directory2017        = "TTGammaEFT_PP_2017_TTG_v4/dilep/"
     postprocessing_output_directory     = "/afs/hephy.at/data/llechner01/TTGammaEFT/nanoTuples/"
     analysis_results                    = results_directory
+    cache_directory                     = "/afs/hephy.at/data/llechner01/TTGammaEFT/cache/"

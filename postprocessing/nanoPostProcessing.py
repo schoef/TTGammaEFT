@@ -63,7 +63,7 @@ def get_parser():
     argParser.add_argument('--processingEra',               action='store',         nargs='?',  type=str,                           default='TTGammaEFT_PP_v1',         help="Name of the processing era")
     argParser.add_argument('--skim',                        action='store',         nargs='?',  type=str,                           default='dilep',                    help="Skim conditions to be applied for post-processing")
     argParser.add_argument('--small',                       action='store_true',                                                                                        help="Run the file on a small sample (for test purpose), bool flag set to True if used")
-    argParser.add_argument('--year',                        action='store',                     type=int,   choices=[2016,2017],    required = True,                    help="Which year?")
+    argParser.add_argument('--year',                        action='store',                     type=int,   choices=[2016,2017,2018],  required = True,                    help="Which year?")
     argParser.add_argument('--addReweights',                action='store_true',                                                                                        help="Add reweights for sample EFT reweighting?")
     argParser.add_argument('--interpolationOrder',          action='store',         nargs='?',  type=int,                           default=2,                          help="Interpolation order for EFT weights.")
     argParser.add_argument('--triggerSelection',            action='store_true',                                                                                        help="Trigger selection?" )
@@ -89,17 +89,18 @@ logger_rt = logger_rt.get_logger(options.logLevel, logFile = None )
 writeToDPM = options.targetDir == '/dpm/'
 
 # Flags 
-isDiLep     = options.skim.lower().startswith('dilep')
-isSingleLep = options.skim.lower().startswith('singlelep')
-#isInclusive = options.skim.lower().count('inclusive')
+isDiLep   = options.skim.lower().startswith('dilep')
+isSemiLep = options.skim.lower().startswith('semilep')
 
+#isInclusive = options.skim.lower().count('inclusive')
 # Skim condition
 skimConds = []
 if isDiLep:
     skimConds.append( "(Sum$(Electron_pt>=15&&abs(Electron_eta)<2.5)+Sum$(Muon_pt>=15&&abs(Muon_eta)<2.5))>=2" )
-elif isSingleLep:
+elif isSemiLep:
     skimConds.append( "(Sum$(Electron_pt>=15&&abs(Electron_eta)<2.5)>=1)||(Sum$(Muon_pt>=15&&abs(Muon_eta)<2.5)>=1)" )
-
+else:
+    skimConds = ["(1)"]
 
 #Samples: Load samples
 maxN = None
@@ -114,6 +115,9 @@ if options.year == 2016:
 elif options.year == 2017:
     from Samples.nanoAOD.Fall17            import *
     from Samples.nanoAOD.Run2017_31Mar2018 import *
+elif options.year == 2018:
+    from Samples.nanoAOD.Autumn18          import *
+    from Samples.nanoAOD.Run2018_14Sep2018 import *
 
 # Load all samples to be post processed
 samples = map( eval, options.samples ) 
@@ -132,8 +136,8 @@ assert isMC or len(samples)==1, "Don't concatenate data samples"
 # Trigger selection
 if isData and options.triggerSelection:
     from TTGammaEFT.Tools.TriggerSelector import TriggerSelector
-    Ts          = TriggerSelector(options.year)
-    triggerCond = Ts.getSelection(options.samples[0] if isData else "MC")
+    Ts          = TriggerSelector( options.year, singleLepton = isSemiLep )
+    triggerCond = Ts.getSelection( options.samples[0] if isData else "MC" )
     logger.info("Sample will have the following trigger skim: %s"%triggerCond)
     skimConds.append( triggerCond )
 
@@ -153,23 +157,28 @@ xSection = samples[0].xSection if isMC else None
 
 # Reweighting, Scalefactors, Efficiencies
 from TTGammaEFT.Tools.LeptonSF import LeptonSF as LeptonSF_
-LeptonSF = LeptonSF_()
+LeptonSF = LeptonSF_( year=options.year )
 
 from TTGammaEFT.Tools.LeptonTrackingEfficiency import LeptonTrackingEfficiency
-LeptonTrackingSF = LeptonTrackingEfficiency()
+LeptonTrackingSF = LeptonTrackingEfficiency( year=options.year )
 
 from TTGammaEFT.Tools.PhotonSF import PhotonSF as PhotonSF_
-PhotonSF = PhotonSF_()
+PhotonSF = PhotonSF_( year=options.year )
 
+from TTGammaEFT.Tools.PhotonReconstructionEfficiency import PhotonReconstructionEfficiency
+PhotonRecEff = PhotonReconstructionEfficiency( year=options.year )
+
+# Update to other years when available
 from TTGammaEFT.Tools.PhotonElectronVetoEfficiency import PhotonElectronVetoEfficiency
 PhotonElectronVetoSF = PhotonElectronVetoEfficiency()
 
 from TTGammaEFT.Tools.TriggerEfficiency import TriggerEfficiency
-TriggerEff_withBackup = TriggerEfficiency( with_backup_triggers = True )
-TriggerEff            = TriggerEfficiency( with_backup_triggers = False )
+TriggerEff_withBackup = TriggerEfficiency( with_backup_triggers = True,  year=options.year )
+TriggerEff            = TriggerEfficiency( with_backup_triggers = False, year=options.year )
 
+# Update to other years when available
 from TTGammaEFT.Tools.BTagEfficiency import BTagEfficiency
-BTagEff = BTagEfficiency() # default medium WP
+BTagEff = BTagEfficiency( year=options.year ) # default medium WP
 
 if isMC:
     from TTGammaEFT.Tools.puReweighting import getReweightingFunction
@@ -277,7 +286,7 @@ if sample.isData:
     lumiList = LumiList( os.path.expandvars( sample.json ) )
     logger.info( "Loaded json %s", sample.json )
 else:
-    lumiScaleFactor = xSection * targetLumi / float( sample.normalization ) if xSection is not None else None
+    lumiScaleFactor = 1#xSection * targetLumi / float( sample.normalization ) if xSection is not None else None
     branchKeepStrings = branchKeepStrings_DATAMC + branchKeepStrings_MC
 
 if sample.isData:
@@ -415,6 +424,7 @@ if isMC:
 
     new_variables += [ 'reweightPhotonSF/F', 'reweightPhotonSFUp/F', 'reweightPhotonSFDown/F' ]
     new_variables += [ 'reweightPhotonElectronVetoSF/F' ]
+    new_variables += [ 'reweightPhotonReconstructionSF/F' ]
 
     # Btag weights Method 1a
     for var in BTagEff.btagWeightNames:
@@ -750,7 +760,8 @@ def filler( event ):
         event.reweightPhotonSFUp   = reduce( mul, [ PhotonSF.getSF( pt=p['pt'], eta=p['eta'], sigma = +1 ) for p in mediumPhotons ], 1 )
         event.reweightPhotonSFDown = reduce( mul, [ PhotonSF.getSF( pt=p['pt'], eta=p['eta'], sigma = -1 ) for p in mediumPhotons ], 1 )
 
-        event.reweightPhotonElectronVetoSF = reduce( mul, [ PhotonElectronVetoSF.getSF( pt=p['pt'], eta=p['eta'] ) for p in mediumPhotons ], 1 )
+        event.reweightPhotonElectronVetoSF   = reduce( mul, [ PhotonElectronVetoSF.getSF( pt=p['pt'], eta=p['eta'] ) for p in mediumPhotons ], 1 )
+        event.reweightPhotonReconstructionSF = reduce( mul, [ PhotonRecEff.getSF( pt=p['pt'], eta=p['eta'] ) for p in mediumPhotons ], 1 )
 
         # B-Tagging efficiency method 1a
         for var in BTagEff.btagWeightNames:

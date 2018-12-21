@@ -5,32 +5,88 @@ from TTGammaEFT.Tools.helpers import getObjFromFile
 basedir = "$CMSSW_BASE/src/TTGammaEFT/Tools/data/triggerEff/"
 
 #OR of all backput triggers
-#FIXME new efficiencies are there, but use old ones for consistency
-ee_trigger_SF   = basedir + 'Run2016BCDEFG_HLT_ee_DZ_None_measuredInMET_minLeadLepPt0.root'
-mue_trigger_SF  = basedir + 'Run2016BCDEFG_HLT_mue_None_measuredInMET_minLeadLepPt0.root'
-mumu_trigger_SF = basedir + 'Run2016BCDEFG_HLT_mumuIso_None_measuredInMET_minLeadLepPt0.root'
+#2016
+ee_trigger2016_SF   = basedir + 'Run2016BCDEFG_HLT_ee_DZ_None_measuredInMET_minLeadLepPt0.root'
+mue_trigger2016_SF  = basedir + 'Run2016BCDEFG_HLT_mue_None_measuredInMET_minLeadLepPt0.root'
+mumu_trigger2016_SF = basedir + 'Run2016BCDEFG_HLT_mumuIso_None_measuredInMET_minLeadLepPt0.root'
 
-ee_trigger_SF_with_backup   = basedir + 'Run2016BCDEFGH_HLT_ee_DZ_OR_HLT_ee_33_OR_HLT_ee_33_MW_OR_HLT_SingleEle_noniso_None_measuredInMET_minLeadLepPt0.root'
-mue_trigger_SF_with_backup  = basedir + 'Run2016BCDEFGH_HLT_mue_OR_HLT_mu30e30_OR_HLT_SingleEle_noniso_OR_HLT_SingleMu_noniso_None_measuredInMET_minLeadLepPt0.root'
-mumu_trigger_SF_with_backup = basedir + 'Run2016BCDEFGH_HLT_mumuIso_OR_HLT_mumuNoiso_OR_HLT_SingleMu_noniso_None_measuredInMET_minLeadLepPt0.root'
+ee_trigger2016_SF_with_backup   = basedir + 'Run2016BCDEFGH_HLT_ee_DZ_OR_HLT_ee_33_OR_HLT_ee_33_MW_OR_HLT_SingleEle_noniso_None_measuredInMET_minLeadLepPt0.root'
+mue_trigger2016_SF_with_backup  = basedir + 'Run2016BCDEFGH_HLT_mue_OR_HLT_mu30e30_OR_HLT_SingleEle_noniso_OR_HLT_SingleMu_noniso_None_measuredInMET_minLeadLepPt0.root'
+mumu_trigger2016_SF_with_backup = basedir + 'Run2016BCDEFGH_HLT_mumuIso_OR_HLT_mumuNoiso_OR_HLT_SingleMu_noniso_None_measuredInMET_minLeadLepPt0.root'
+
+#2017
+# UPDATE WHEN AVAILABLE
+ee_trigger2017_SF   = basedir + 'Run2016BCDEFG_HLT_ee_DZ_None_measuredInMET_minLeadLepPt0.root'
+mue_trigger2017_SF  = basedir + 'Run2016BCDEFG_HLT_mue_None_measuredInMET_minLeadLepPt0.root'
+mumu_trigger2017_SF = basedir + 'Run2016BCDEFG_HLT_mumuIso_None_measuredInMET_minLeadLepPt0.root'
+
+ee_trigger2017_SF_with_backup   = basedir + 'Run2016BCDEFGH_HLT_ee_DZ_OR_HLT_ee_33_OR_HLT_ee_33_MW_OR_HLT_SingleEle_noniso_None_measuredInMET_minLeadLepPt0.root'
+mue_trigger2017_SF_with_backup  = basedir + 'Run2016BCDEFGH_HLT_mue_OR_HLT_mu30e30_OR_HLT_SingleEle_noniso_OR_HLT_SingleMu_noniso_None_measuredInMET_minLeadLepPt0.root'
+mumu_trigger2017_SF_with_backup = basedir + 'Run2016BCDEFGH_HLT_mumuIso_OR_HLT_mumuNoiso_OR_HLT_SingleMu_noniso_None_measuredInMET_minLeadLepPt0.root'
+
+#2018
+# UPDATE WHEN AVAILABLE
+ee_trigger2018_SF   = basedir + 'Run2016BCDEFG_HLT_ee_DZ_None_measuredInMET_minLeadLepPt0.root'
+mue_trigger2018_SF  = basedir + 'Run2016BCDEFG_HLT_mue_None_measuredInMET_minLeadLepPt0.root'
+mumu_trigger2018_SF = basedir + 'Run2016BCDEFG_HLT_mumuIso_None_measuredInMET_minLeadLepPt0.root'
+
+ee_trigger2018_SF_with_backup   = basedir + 'Run2016BCDEFGH_HLT_ee_DZ_OR_HLT_ee_33_OR_HLT_ee_33_MW_OR_HLT_SingleEle_noniso_None_measuredInMET_minLeadLepPt0.root'
+mue_trigger2018_SF_with_backup  = basedir + 'Run2016BCDEFGH_HLT_mue_OR_HLT_mu30e30_OR_HLT_SingleEle_noniso_OR_HLT_SingleMu_noniso_None_measuredInMET_minLeadLepPt0.root'
+mumu_trigger2018_SF_with_backup = basedir + 'Run2016BCDEFGH_HLT_mumuIso_OR_HLT_mumuNoiso_OR_HLT_SingleMu_noniso_None_measuredInMET_minLeadLepPt0.root'
 
 class TriggerEfficiency:
-    def __init__(self, with_backup_triggers = False):
+    def __init__( self, with_backup_triggers=False, year=2016 ):
 
-        if not with_backup_triggers:
-            self.mumu_highEta   = getObjFromFile(os.path.expandvars(mumu_trigger_SF), "eff_pt1_pt2_highEta1_veryCoarse")
-            self.mumu_lowEta    = getObjFromFile(os.path.expandvars(mumu_trigger_SF), "eff_pt1_pt2_lowEta1_veryCoarse")
-            self.ee_highEta     = getObjFromFile(os.path.expandvars(ee_trigger_SF),   "eff_pt1_pt2_highEta1_veryCoarse")
-            self.ee_lowEta      = getObjFromFile(os.path.expandvars(ee_trigger_SF),   "eff_pt1_pt2_lowEta1_veryCoarse")
-            self.mue_highEta    = getObjFromFile(os.path.expandvars(mue_trigger_SF),  "eff_pt1_pt2_highEta1_veryCoarse")
-            self.mue_lowEta     = getObjFromFile(os.path.expandvars(mue_trigger_SF),  "eff_pt1_pt2_lowEta1_veryCoarse")
-        else:
-            self.mumu_highEta   = getObjFromFile(os.path.expandvars(mumu_trigger_SF_with_backup), "eff_pt1_pt2_highEta1_veryCoarse")
-            self.mumu_lowEta    = getObjFromFile(os.path.expandvars(mumu_trigger_SF_with_backup), "eff_pt1_pt2_lowEta1_veryCoarse")
-            self.ee_highEta     = getObjFromFile(os.path.expandvars(ee_trigger_SF_with_backup),   "eff_pt1_pt2_highEta1_veryCoarse")
-            self.ee_lowEta      = getObjFromFile(os.path.expandvars(ee_trigger_SF_with_backup),   "eff_pt1_pt2_lowEta1_veryCoarse")
-            self.mue_highEta    = getObjFromFile(os.path.expandvars(mue_trigger_SF_with_backup),  "eff_pt1_pt2_highEta1_veryCoarse")
-            self.mue_lowEta     = getObjFromFile(os.path.expandvars(mue_trigger_SF_with_backup),  "eff_pt1_pt2_lowEta1_veryCoarse")
+        if year not in [ 2016, 2017, 2018 ]:
+            raise Exception("Lepton SF for year %i not known"%year)
+
+        if year == 2016:
+            if not with_backup_triggers:
+                self.mumu_highEta   = getObjFromFile(os.path.expandvars(mumu_trigger2016_SF), "eff_pt1_pt2_highEta1_veryCoarse")
+                self.mumu_lowEta    = getObjFromFile(os.path.expandvars(mumu_trigger2016_SF), "eff_pt1_pt2_lowEta1_veryCoarse")
+                self.ee_highEta     = getObjFromFile(os.path.expandvars(ee_trigger2016_SF),   "eff_pt1_pt2_highEta1_veryCoarse")
+                self.ee_lowEta      = getObjFromFile(os.path.expandvars(ee_trigger2016_SF),   "eff_pt1_pt2_lowEta1_veryCoarse")
+                self.mue_highEta    = getObjFromFile(os.path.expandvars(mue_trigger2016_SF),  "eff_pt1_pt2_highEta1_veryCoarse")
+                self.mue_lowEta     = getObjFromFile(os.path.expandvars(mue_trigger2016_SF),  "eff_pt1_pt2_lowEta1_veryCoarse")
+            else:
+                self.mumu_highEta   = getObjFromFile(os.path.expandvars(mumu_trigger2016_SF_with_backup), "eff_pt1_pt2_highEta1_veryCoarse")
+                self.mumu_lowEta    = getObjFromFile(os.path.expandvars(mumu_trigger2016_SF_with_backup), "eff_pt1_pt2_lowEta1_veryCoarse")
+                self.ee_highEta     = getObjFromFile(os.path.expandvars(ee_trigger2016_SF_with_backup),   "eff_pt1_pt2_highEta1_veryCoarse")
+                self.ee_lowEta      = getObjFromFile(os.path.expandvars(ee_trigger2016_SF_with_backup),   "eff_pt1_pt2_lowEta1_veryCoarse")
+                self.mue_highEta    = getObjFromFile(os.path.expandvars(mue_trigger2016_SF_with_backup),  "eff_pt1_pt2_highEta1_veryCoarse")
+                self.mue_lowEta     = getObjFromFile(os.path.expandvars(mue_trigger2016_SF_with_backup),  "eff_pt1_pt2_lowEta1_veryCoarse")
+
+        elif year == 2017:
+            if not with_backup_triggers:
+                self.mumu_highEta   = getObjFromFile(os.path.expandvars(mumu_trigger2016_SF), "eff_pt1_pt2_highEta1_veryCoarse")
+                self.mumu_lowEta    = getObjFromFile(os.path.expandvars(mumu_trigger2016_SF), "eff_pt1_pt2_lowEta1_veryCoarse")
+                self.ee_highEta     = getObjFromFile(os.path.expandvars(ee_trigger2016_SF),   "eff_pt1_pt2_highEta1_veryCoarse")
+                self.ee_lowEta      = getObjFromFile(os.path.expandvars(ee_trigger2016_SF),   "eff_pt1_pt2_lowEta1_veryCoarse")
+                self.mue_highEta    = getObjFromFile(os.path.expandvars(mue_trigger2016_SF),  "eff_pt1_pt2_highEta1_veryCoarse")
+                self.mue_lowEta     = getObjFromFile(os.path.expandvars(mue_trigger2016_SF),  "eff_pt1_pt2_lowEta1_veryCoarse")
+            else:
+                self.mumu_highEta   = getObjFromFile(os.path.expandvars(mumu_trigger2016_SF_with_backup), "eff_pt1_pt2_highEta1_veryCoarse")
+                self.mumu_lowEta    = getObjFromFile(os.path.expandvars(mumu_trigger2016_SF_with_backup), "eff_pt1_pt2_lowEta1_veryCoarse")
+                self.ee_highEta     = getObjFromFile(os.path.expandvars(ee_trigger2016_SF_with_backup),   "eff_pt1_pt2_highEta1_veryCoarse")
+                self.ee_lowEta      = getObjFromFile(os.path.expandvars(ee_trigger2016_SF_with_backup),   "eff_pt1_pt2_lowEta1_veryCoarse")
+                self.mue_highEta    = getObjFromFile(os.path.expandvars(mue_trigger2016_SF_with_backup),  "eff_pt1_pt2_highEta1_veryCoarse")
+                self.mue_lowEta     = getObjFromFile(os.path.expandvars(mue_trigger2016_SF_with_backup),  "eff_pt1_pt2_lowEta1_veryCoarse")
+
+        elif year == 2018:
+            if not with_backup_triggers:
+                self.mumu_highEta   = getObjFromFile(os.path.expandvars(mumu_trigger2016_SF), "eff_pt1_pt2_highEta1_veryCoarse")
+                self.mumu_lowEta    = getObjFromFile(os.path.expandvars(mumu_trigger2016_SF), "eff_pt1_pt2_lowEta1_veryCoarse")
+                self.ee_highEta     = getObjFromFile(os.path.expandvars(ee_trigger2016_SF),   "eff_pt1_pt2_highEta1_veryCoarse")
+                self.ee_lowEta      = getObjFromFile(os.path.expandvars(ee_trigger2016_SF),   "eff_pt1_pt2_lowEta1_veryCoarse")
+                self.mue_highEta    = getObjFromFile(os.path.expandvars(mue_trigger2016_SF),  "eff_pt1_pt2_highEta1_veryCoarse")
+                self.mue_lowEta     = getObjFromFile(os.path.expandvars(mue_trigger2016_SF),  "eff_pt1_pt2_lowEta1_veryCoarse")
+            else:
+                self.mumu_highEta   = getObjFromFile(os.path.expandvars(mumu_trigger2016_SF_with_backup), "eff_pt1_pt2_highEta1_veryCoarse")
+                self.mumu_lowEta    = getObjFromFile(os.path.expandvars(mumu_trigger2016_SF_with_backup), "eff_pt1_pt2_lowEta1_veryCoarse")
+                self.ee_highEta     = getObjFromFile(os.path.expandvars(ee_trigger2016_SF_with_backup),   "eff_pt1_pt2_highEta1_veryCoarse")
+                self.ee_lowEta      = getObjFromFile(os.path.expandvars(ee_trigger2016_SF_with_backup),   "eff_pt1_pt2_lowEta1_veryCoarse")
+                self.mue_highEta    = getObjFromFile(os.path.expandvars(mue_trigger2016_SF_with_backup),  "eff_pt1_pt2_highEta1_veryCoarse")
+                self.mue_lowEta     = getObjFromFile(os.path.expandvars(mue_trigger2016_SF_with_backup),  "eff_pt1_pt2_lowEta1_veryCoarse")
 
         h_ = [self.mumu_highEta, self.mumu_lowEta, self.ee_highEta, self.ee_lowEta, self.mue_highEta, self.mue_lowEta]
         assert False not in [bool(x) for x in h_], "Could not load trigger SF: %r"%h_
