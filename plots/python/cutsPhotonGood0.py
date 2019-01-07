@@ -86,10 +86,10 @@ cutsPhotonGood0.append( Plot(
     binning   = [ 2, 0, 2 ],
 ))
 
-cutsPhotonGood0.append( Plot(
-    name      = 'photonGood0_cutBasedId',
-    texX      = 'cut-based ID(#gamma_{0})',
-    texY      = 'Number of Events',
-    attribute = lambda event, sample: event.PhotonGood_cutBased[0] if event.nPhotonGood > 0 else defaultValue,
-    binning   = [ 4, 0, 4 ],
-))
+#cutsPhotonGood0.append( Plot(
+#    name      = 'photonGood0_cutBasedId',
+#    texX      = 'cut-based ID(#gamma_{0})',
+#    texY      = 'Number of Events',
+#    attribute = lambda event, sample: event.PhotonGood_cutBased[0] if event.nPhotonGood > 0 else defaultValue,
+#    binning   = [ 4, 0, 4 ],
+#))

@@ -15,7 +15,7 @@ from TTGammaEFT.Tools.constants       import defaultValue
 photon1 = []
     
 photon1.append( Plot(
-    name      = 'gamma1_pt',
+    name      = 'photon1_pt',
     texX      = 'p_{T}(#gamma_{1}) (GeV)',
     texY      = 'Number of Events / 5 GeV',
     attribute = lambda event, sample: event.Photon_pt[1] if event.nPhoton > 1 else defaultValue,
@@ -23,7 +23,7 @@ photon1.append( Plot(
 ))
 
 photon1.append( Plot(
-    name      = 'gamma1_eta_tight',
+    name      = 'photon1_eta_tight',
     texX      = '#eta(#gamma_{1})',
     texY      = 'Number of Events',
     attribute = lambda event, sample: event.Photon_eta[1] if event.nPhoton > 1 else defaultValue,
@@ -31,7 +31,7 @@ photon1.append( Plot(
 ))
 
 photon1.append( Plot(
-    name      = 'gamma1_eta',
+    name      = 'photon1_eta',
     texX      = '#eta(#gamma_{1})',
     texY      = 'Number of Events',
     attribute = lambda event, sample: event.Photon_eta[1] if event.nPhoton > 1 else defaultValue,
@@ -39,7 +39,7 @@ photon1.append( Plot(
 ))
 
 photon1.append( Plot(
-    name      = 'gamma1_absEta_tight',
+    name      = 'photon1_absEta_tight',
     texX      = '|#eta|(#gamma_{1})',
     texY      = 'Number of Events',
     attribute = lambda event, sample: abs(event.Photon_eta[1]) if event.nPhoton > 1 else defaultValue,
@@ -47,7 +47,7 @@ photon1.append( Plot(
 ))
 
 photon1.append( Plot(
-    name      = 'gamma1_absEta',
+    name      = 'photon1_absEta',
     texX      = '|#eta|(#gamma_{1})',
     texY      = 'Number of Events',
     attribute = lambda event, sample: abs(event.Photon_eta[1]) if event.nPhoton > 1 else defaultValue,
@@ -55,7 +55,7 @@ photon1.append( Plot(
 ))
 
 photon1.append( Plot(
-    name      = 'gamma1_phi',
+    name      = 'photon1_phi',
     texX      = '#phi(#gamma_{1})',
     texY      = 'Number of Events',
     attribute = lambda event, sample: event.Photon_phi[1] if event.nPhoton > 1 else defaultValue,
