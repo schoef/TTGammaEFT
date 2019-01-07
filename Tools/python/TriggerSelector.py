@@ -56,12 +56,16 @@ class TriggerSelector:
         # define which triggers should be used for which dataset
         self.DoubleMuon     = "(%s)"%"||".join( self.mm ) if self.mm else None
         self.DoubleEG       = "(%s)"%"||".join( self.ee ) if self.ee else None
+        self.EGamma         = "(%s)"%"||".join( self.ee ) if self.ee else None
         self.MuonEG         = "(%s)"%"||".join( self.em ) if self.em else None
         self.SingleMuon     = "(%s)"%"||".join( self.m  ) if self.m  else None
         self.SingleElectron = "(%s)"%"||".join( self.e  ) if self.e  else None
 
         # define an arbitrary hierarchy
-        self.PDHierarchy = [ "DoubleMuon", "DoubleEG", "MuonEG", "SingleMuon", "SingleElectron" ]
+        if year == 2018:
+            self.PDHierarchy = [ "DoubleMuon", "EGamma", "MuonEG", "SingleMuon", "SingleElectron" ]
+        else:
+            self.PDHierarchy = [ "DoubleMuon", "DoubleEG", "MuonEG", "SingleMuon", "SingleElectron" ]
 
     def __getVeto( self, cutString ):
         return "!%s" %cutString
@@ -89,3 +93,4 @@ class TriggerSelector:
                 raise NotImplementedError( "Trigger selection for %s not implemented" %PD )
 
             return "(%s)" %cutString
+

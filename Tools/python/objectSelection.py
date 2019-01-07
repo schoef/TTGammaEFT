@@ -225,8 +225,14 @@ def jetSelector( jet_selection ):
         return func
     elif jet_selection == 'basic':
         def func(j):
-            if j["pt"]            <= 30:           return False
-            if abs(j["eta"])      >= 2.4:          return False
+#            if j["pt"]            <= 15:           return False
+#            if abs(j["eta"])      >= 4.0:          return False
+            if j["nConstituents"]  < 2:            return False
+            if j["neHEF"]         >= 0.99:         return False
+            if j["neEmEF"]        >= 0.99:         return False
+            if j["chEmEF"]        >= 0.99:         return False
+            if j["chHEF"]         <= 0.:           return False
+            if j["jetId"] < jetIdBitwise['loose']: return False
             return True
         return func
 
@@ -268,8 +274,12 @@ def muonSelector( lepton_selection ):
 
     elif lepton_selection == 'basic':
         def func(l):
-            if l["pt"]             <= 15:   return False
-            if abs(l["eta"])       >= 2.4:  return False
+            if l["pt"]             <= 10:   return False
+#            if abs(l["eta"])       >= 3.0:  return False
+            if l['pfRelIso03_all'] >= 0.4:  return False
+            if l["sip3d"]          >= 4:    return False
+            if not vertexSelector(l):       return False
+#            if not l["isGlobal"]:           return False
             return True
         return func
 
@@ -324,8 +334,13 @@ def eleSelector( lepton_selection ):
 
     elif lepton_selection == 'basic':
         def func(l):
-            if l["pt"]             <= 15:              return False
-            if abs(l["eta"])       >= 2.4:             return False
+            if l["pt"]             <= 10:              return False
+#            if abs(l["eta"])       >= 3.0:             return False
+            if not barrelEndcapVeto(l):                return False
+            if l['pfRelIso03_all'] >= 0.4:             return False
+            if l["sip3d"]          >= 4:               return False
+            if not vertexSelector(l):                  return False
+            if l[idVar] < electronIdCutBased['veto']:  return False
             return True
         return func
 
@@ -353,8 +368,11 @@ def photonSelector( selection, year=2016 ):
 
     elif selection == 'basic':
         def func(g):
-            if g["pt"]       <= 13:           return False
-            if abs(g["eta"]) >= 1.479:        return False
+            if g["pt"]       <= 10:           return False
+#            if abs(g["eta"]) >= 3.0:          return False
+            if g["pixelSeed"]:                return False
+            if not g["electronVeto"]:         return False
+            if g[idVar] < photonId['loose']:  return False
             return True
         return func
 
@@ -446,39 +464,8 @@ def filterGenBJets( genJets ):
 #  1: stage of event generation inside PYTHIA
 # 22: intermediate (intended to have preserved mass) (tops)
 
-def getFilterCut( isData=False, isFastSim=False, year=2016, ignoreJSON=False ):
-    if isFastSim:
-        filters             = [ "Flag_goodVertices" ]
-    elif year == 2016:
-        filters             = [ "Flag_goodVertices" ]
-        filters            += [ "Flag_HBHENoiseFilter" ]
-        filters            += [ "Flag_HBHENoiseIsoFilter" ]
-        filters            += [ "Flag_globalSuperTightHalo2016Filter" ]
-        filters            += [ "Flag_EcalDeadCellTriggerPrimitiveFilter" ]
-#        filters            += [ "Flag_BadPFMuonFilter" ]
-#        filters            += [ "Flag_BadChargedCandidateFilter" ]
-        if isData:
-            filters        += [ "Flag_eeBadScFilter" ]
-    elif year == 2017:
-        filters             = [ "Flag_goodVertices" ]
-        filters            += [ "Flag_HBHENoiseFilter" ]
-        filters            += [ "Flag_HBHENoiseIsoFilter" ]
-        filters            += [ "Flag_globalSuperTightHalo2016Filter" ]
-        filters            += [ "Flag_EcalDeadCellTriggerPrimitiveFilter" ]
-        filters            += [ "Flag_BadPFMuonFilter" ]
-        filters            += [ "Flag_BadChargedCandidateFilter" ]
-#        filters            += [ "ecalBadCalibReducedMINIAODFilter" ]
-        if isData:
-            filters        += [ "Flag_eeBadScFilter" ]
-    if isData:
-        filters            += [ "weight>0" ]
-        if not ignoreJSON:
-            filters        += [ "jsonPassed>0" ]
-    return "&&".join(filters)
-
-
 # switch to that in next pp
-def getFilterCutsAll( year, isData=False, ignoreJSON=False ):
+def getFilterCut( year, isData=False, ignoreJSON=False ):
     # Flag_ecalBadCalibReducedMINIAODFilter not yet implemented
     # Flag_BadPFMuonFilter and Flag_BadChargedCandidateFilter in version 94x or higher
 
