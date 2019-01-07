@@ -14,9 +14,7 @@ from RootTools.core.standard          import *
 # Internal Imports
 from TTGammaEFT.Tools.user            import plot_directory
 
-##########################################
-from TTGammaEFT.Tools.cutInterpreterGood  import cutInterpreter
-##########################################
+from TTGammaEFT.Tools.cutInterpreter  import cutInterpreter
 
 from TTGammaEFT.Tools.TriggerSelector import TriggerSelector
 
@@ -54,10 +52,10 @@ if args.onlyTTG:         args.plot_directory += "_onlyTTG"
 if args.normalize:       args.plot_directory += "_normalize"
 
 # 2017 Samples
-postprocessing_directory = "TTGammaEFT_PP_2017_TTG_v5/dilep/"
+postprocessing_directory = "TTGammaEFT_PP_2017_TTG_prefiring_v1/dilep/"
 #from TTGammaEFT.Samples.nanoTuples_Summer16_postProcessed    import *
 if not args.noData:
-    postprocessing_directory = "TTGammaEFT_PP_2017_TTG_v5/dilep/"
+    postprocessing_directory = "TTGammaEFT_PP_2017_TTG_prefiring_v1/dilep/"
     from TTGammaEFT.Samples.nanoTuples_Run2017_31Mar2018_postProcessed import *
 
 # Text on the plots

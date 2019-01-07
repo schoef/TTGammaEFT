@@ -20,8 +20,8 @@ from TTGammaEFT.plots.jetGood0         import jetGood0
 from TTGammaEFT.plots.jetGood1         import jetGood1
 from TTGammaEFT.plots.jet0             import jet0
 from TTGammaEFT.plots.jet1             import jet1
-from TTGammaEFT.plots.bjet0            import bjet0
-from TTGammaEFT.plots.bjet1            import bjet1
+from TTGammaEFT.plots.bjetGood0        import bjetGood0
+from TTGammaEFT.plots.bjetGood1        import bjetGood1
 from TTGammaEFT.plots.multiplicity     import multiplicity
 from TTGammaEFT.plots.multiplicityGood import multiplicityGood
 from TTGammaEFT.plots.massGood         import massGood
@@ -42,8 +42,8 @@ plotListData += jet0
 plotListData += jet1
 plotListData += jetGood0
 plotListData += jetGood1
-plotListData += bjet0
-plotListData += bjet1
+plotListData += bjetGood0
+plotListData += bjetGood1
 plotListData += multiplicity
 plotListData += multiplicityGood
 plotListData += massGood
