@@ -50,10 +50,10 @@ if args.onlyTTG:         args.plot_directory += "_onlyTTG"
 if args.normalize:       args.plot_directory += "_normalize"
 
 # 2016 Samples
-postprocessing_directory = "TTGammaEFT_PP_2016_TTG_v1/dilep/"
+#postprocessing_directory = "TTGammaEFT_PP_2016_TTG_v1/dilep/"
 from TTGammaEFT.Samples.nanoTuples_Summer16_postProcessed    import *
 if not args.noData:
-    postprocessing_directory = "TTGammaEFT_PP_2016_TTG_v1/dilep/"
+#    postprocessing_directory = "TTGammaEFT_PP_2016_TTG_Data_v1/dilep/"
     from TTGammaEFT.Samples.nanoTuples_Run2016_05Feb2018_postProcessed import *
 
 # Text on the plots
@@ -74,7 +74,7 @@ scaling = { 1:0 }
 # Plotting
 def drawPlots( plots, mode, dataMCScale ):
     for log in [False, True]:
-        plot_directory_ = os.path.join( plot_directory, 'analysisPlots', args.plot_directory, args.selection, mode, "log" if log else "lin" )
+        plot_directory_ = os.path.join( plot_directory, 'analysisPlots2016', args.plot_directory, args.selection, mode, "log" if log else "lin" )
 
         for plot in plots:
             if not max(l[0].GetMaximum() for l in plot.histos): 
@@ -83,9 +83,9 @@ def drawPlots( plots, mode, dataMCScale ):
             if not args.noData: 
                 plot.histos[1][0].style          = styles.errorStyle( ROOT.kBlack )
                 if mode == "all":
-                    plot.histos[1][0].legendText = "Data" + postFix
+                    plot.histos[1][0].legendText = "data" + postFix
                 if mode == "SF":
-                    plot.histos[1][0].legendText = "Data (SF)" + postFix
+                    plot.histos[1][0].legendText = "data (SF)" + postFix
             extensions_ = ["pdf", "png", "root"] if mode in ['all', 'SF', 'mue'] else ['png']
 
             plotting.draw( plot,
@@ -112,13 +112,13 @@ def getYieldPlot( index ):
 # Read variables and sequences
 read_variables  = ["weight/F", "ref_weight/F",
                    "PV_npvs/I", "PV_npvsGood/I",
-                   "nJet/I", "nAllJet/I", "nBTag/I",
-                   "Jet[%s]"         %nanoPlotJetVarString,
-                   "nLepton/I", "nLeptonTight/I", "nLeptonVeto/I", "nElectron/I", "nMuon/I",
-                   "Lepton[%s]"      %nanoPlotLeptonVarString,
-                   "nPhoton/I",
-                   "Photon[%s]"      %(nanoPlotPhotonVarString),
-                   "MET_pt/F", "MET_phi/F", "METSig/F", "ht/F",
+                   "nJetGood/I", "nBTagGood/I",
+                   "JetGood[%s]" %nanoPlotJetVarString,
+                   "nLeptonGood/I", "nLeptonTight/I", "nLeptonVeto/I", "nElectronGood/I", "nMuonGood/I",
+                   "LeptonGood[%s]" %nanoPlotLeptonVarString,
+                   "nPhotonGood/I",
+                   "PhotonGood[%s]" %(nanoPlotPhotonVarString),
+                   "MET_pt/F", "MET_phi/F", "METSigGood/F", "htGood/F",
                    "mll/F", "mllgamma/F",
                    "m3/F", "m3wBJet/F",
                    "lldR/F", "lldPhi/F", "bbdR/F", "bbdPhi/F",
@@ -135,7 +135,7 @@ read_variables += [ 'Bj0_' + var for var in nanoPlotBJetVarString.split(',') ]
 read_variables += [ 'Bj1_' + var for var in nanoPlotBJetVarString.split(',') ]
 
 read_variables_MC = ["isTTGamma/I", "isZGamma/I",
-                     "Photon[photonCat/I]",
+                     "PhotonGood[photonCat/I]",
 #                     "GenElectron[%s]" %nanoGenVarString,
 #                     "GenMuon[%s]"     %nanoGenVarString,
 #                     "GenPhoton[%s]"   %nanoGenVarString,
@@ -157,9 +157,9 @@ read_variables_MC = ["isTTGamma/I", "isZGamma/I",
 sequence = []
 
 # Sample definition
-if args.onlyTTG: mc = [ TTGLep ]
-else:            mc = [ TTGLep, DY_LO_16 , TTbar, singleTop_16, ZGToLLG ]
-#else:            mc = [ TTGLep, DY_LO_16 , TTbar, ZGToLLG ]
+if args.onlyTTG: mc = [ TTGLep_16 ]
+else:            mc = [ TTGLep_16, DY_LO_16, TT_pow_16, singleTop_16, ZGTo2LG_16, other_16 ]
+#else:            mc = [ TTGLep, DY_LO_16, TTbar, singleTop_16, ZGToLLG_16 ]
 
 if args.noData:
     lumi_scale = 35.9
@@ -193,7 +193,7 @@ for sample in mc + signals:
 if args.small:
     for sample in stack.samples:
         sample.normalization=1.
-        sample.reduceFiles( factor=5 )
+        sample.reduceFiles( factor=15 )
         sample.scale /= sample.normalization
 
 weight_ = lambda event, sample: event.weight
@@ -230,16 +230,16 @@ for index, mode in enumerate( allModes ):
     # Define 2l selections
     leptonSelection = cutInterpreter.cutString( mode )
 
-    if not args.noData:    data_sample.setSelectionString( [ getFilterCut( isData=True, year=2016 ),  leptonSelection ] )
-    for sample in mc + signals: sample.setSelectionString( [ getFilterCut( isData=False, year=2016 ), leptonSelection, tr.getSelection( "MC" ) ] )
+    if not args.noData:    data_sample.setSelectionString( [ getFilterCut( 2016, isData=True  ), leptonSelection ] )
+    for sample in mc + signals: sample.setSelectionString( [ getFilterCut( 2016, isData=False ), leptonSelection, tr.getSelection( "MC" ) ] )
 
     # Overlap removal
-    TTGLep.addSelectionString(    "isTTGamma==1" )
+    TTGLep_16.addSelectionString(    "isTTGamma==1" )
 #    TTG_16.addSelectionString(    "isTTGamma==1" )
-#    TT_pow_16.addSelectionString( "isTTGamma==0" )
-    TTbar.addSelectionString(     "isTTGamma==0" )
-#    ZGTo2LG.addSelectionString(   "isZGamma==1"  )
-    ZGToLLG.addSelectionString(   "isZGamma==1"  )
+    TT_pow_16.addSelectionString( "isTTGamma==0" )
+#    TTbar_16.addSelectionString(     "isTTGamma==0" )
+    ZGTo2LG_16.addSelectionString(   "isZGamma==1"  )
+#    ZGToLLG_16.addSelectionString(   "isZGamma==1"  )
     DY_LO_16.addSelectionString(  "isZGamma==0"  )
 
     plotting.fill( plots, read_variables=read_variables, sequence=sequence )

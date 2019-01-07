@@ -1,10 +1,12 @@
-small="--small"
-
-nohup krenew -t -K 10 -- bash -c "python analysisPlots2017.py ${small} --selection dilepOS-nLepVeto2-offZSFll-mll20 --plot_directory 94X_TTG_ppv3_v2 --plotFile main --normalize" &
-nohup krenew -t -K 10 -- bash -c "python analysisPlots2017.py ${small} --selection dilepOS-nLepVeto2 --plot_directory 94X_TTG_ppv3_v2 --plotFile main --normalize" &
-
 small=""
+#small="--small"
+noData=""
+#noData="--noData"
 
-nohup krenew -t -K 10 -- bash -c "python analysisPlots2017.py ${small} --selection dilepOS-nLepVeto2-offZSFll-mll20 --plot_directory 94X_TTG_ppv3_v2 --plotFile main --normalize" &
-nohup krenew -t -K 10 -- bash -c "python analysisPlots2017.py ${small} --selection dilepOS-nLepVeto2 --plot_directory 94X_TTG_ppv3_v2 --plotFile main --normalize" &
+# Base line selection
+nohup krenew -t -K 10 -- bash -c "python analysisPlots2017.py ${small} ${noData} --selection dilepOS-nLepVeto2-offZSFll-nJet2p-nBTag1p-mll20               --plot_directory 94X_TTG_ppv1_v1 --plotFile allNoPhoton" &
 
+
+# DO NOT UNBLINED
+noData="--noData"
+nohup krenew -t -K 10 -- bash -c "python analysisPlots2017.py ${small} ${noData} --selection dilepOS-nLepVeto2-pTG20-nPhoton1p-offZSFllg-offZSFll-mll40    --plot_directory 94X_TTG_ppv1_v1 --plotFile all" &

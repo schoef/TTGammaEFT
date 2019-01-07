@@ -43,6 +43,9 @@ import RootTools.core.logger as logger_rt
 logger    = logger.get_logger(   args.logLevel, logFile = None)
 logger_rt = logger_rt.get_logger(args.logLevel, logFile = None)
 
+nanoPlotPhotonVarString = nanoPlotPhotonVarString.replace('cutBased','cutBasedBitmap')
+nanoPlotPhotonVars      = [ item if item != 'cutBased' else 'cutBasedBitmap' for item in nanoPlotPhotonVars ]
+
 if args.small:           args.plot_directory += "_small"
 if args.noData:          args.plot_directory += "_noData"
 if args.signal:          args.plot_directory += "_signal_"+args.signal
@@ -50,10 +53,10 @@ if args.onlyTTG:         args.plot_directory += "_onlyTTG"
 if args.normalize:       args.plot_directory += "_normalize"
 
 # 2017 Samples
-postprocessing_directory = "TTGammaEFT_PP_2017_TTG_v3/dilep/"
-#from TTGammaEFT.Samples.nanoTuples_Summer16_postProcessed    import *
+#postprocessing_directory = "TTGammaEFT_PP_2017_TTG_v1/dilep/"
+from TTGammaEFT.Samples.nanoTuples_Fall17_postProcessed    import *
 if not args.noData:
-    postprocessing_directory = "TTGammaEFT_PP_2017_TTG_v3/dilep/"
+#    postprocessing_directory = "TTGammaEFT_PP_2017_TTG_Data_v1/dilep/"
     from TTGammaEFT.Samples.nanoTuples_Run2017_31Mar2018_postProcessed import *
 
 # Text on the plots
@@ -79,16 +82,14 @@ def drawPlots( plots, mode, dataMCScale ):
         for plot in plots:
             if not max(l[0].GetMaximum() for l in plot.histos): 
                 continue # Empty plot
-            postFix = " (unprefirable)"
-#            postFix = " (legacy)"
+            postFix = " (legacy)"
             if not args.noData: 
                 plot.histos[1][0].style          = styles.errorStyle( ROOT.kBlack )
                 if mode == "all":
-#                    plot.histos[1][0].legendText = "Data" + postFix
-                    plot.histos[1][0].legendText = "Data" + postFix
+                    plot.histos[1][0].legendText = "data" + postFix
                 if mode == "SF":
-                    plot.histos[1][0].legendText = "Data" + postFix
-            extensions_ = ["pdf", "png", "root"] if mode in ['all','SF','mue'] else ['png']
+                    plot.histos[1][0].legendText = "data (SF)" + postFix
+            extensions_ = ["pdf", "png", "root"] if mode in ['all', 'SF', 'mue'] else ['png']
 
             plotting.draw( plot,
 	                       plot_directory = plot_directory_,
@@ -114,13 +115,13 @@ def getYieldPlot( index ):
 # Read variables and sequences
 read_variables  = ["weight/F", "ref_weight/F",
                    "PV_npvs/I", "PV_npvsGood/I",
-                   "nJet/I", "nAllJet/I", "nBTag/I",
-                   "Jet[%s]"         %nanoPlotJetVarString,
-                   "nLepton/I", "nLeptonTight/I", "nLeptonVeto/I", "nElectron/I", "nMuon/I",
-                   "Lepton[%s]"      %nanoPlotLeptonVarString,
-                   "nPhoton/I",
-                   "Photon[%s]"      %(nanoPlotPhotonVarString.replace('cutBased','cutBasedBitmap')),
-                   "MET_pt/F", "MET_phi/F", "METSig/F", "ht/F",
+                   "nJetGood/I", "nBTagGood/I",
+                   "JetGood[%s]" %nanoPlotJetVarString,
+                   "nLeptonGood/I", "nLeptonTight/I", "nLeptonVeto/I", "nElectronGood/I", "nMuonGood/I",
+                   "LeptonGood[%s]" %nanoPlotLeptonVarString,
+                   "nPhotonGood/I",
+                   "PhotonGood[%s]" %(nanoPlotPhotonVarString),
+                   "MET_pt/F", "MET_phi/F", "METSigGood/F", "htGood/F",
                    "mll/F", "mllgamma/F",
                    "m3/F", "m3wBJet/F",
                    "lldR/F", "lldPhi/F", "bbdR/F", "bbdPhi/F",
@@ -130,16 +131,14 @@ read_variables  = ["weight/F", "ref_weight/F",
                    "l1GammadR/F", "l1GammadPhi/F",
                    "j0GammadR/F", "j0GammadPhi/F",
                    "j1GammadR/F", "j1GammadPhi/F",
-                   "unPreFirableEvent/I",
                   ]
 
 
 read_variables += [ 'Bj0_' + var for var in nanoPlotBJetVarString.split(',') ]
 read_variables += [ 'Bj1_' + var for var in nanoPlotBJetVarString.split(',') ]
 
-read_variables_MC = [\
-                     "isTTGamma/I", "isZGamma/I",
-                     "Photon[photonCat/I]",
+read_variables_MC = ["isTTGamma/I", "isZGamma/I",
+                     "PhotonGood[photonCat/I]",
 #                     "GenElectron[%s]" %nanoGenVarString,
 #                     "GenMuon[%s]"     %nanoGenVarString,
 #                     "GenPhoton[%s]"   %nanoGenVarString,
@@ -156,24 +155,22 @@ read_variables_MC = [\
                      "reweightBTag_SF/F", "reweightBTag_SF_b_Down/F", "reweightBTag_SF_b_Up/F", "reweightBTag_SF_l_Down/F", "reweightBTag_SF_l_Up/F",
                     ]
 
+
 # Sequence
 sequence = []
 
 # Sample definition
-#if args.onlyTTG: mc = [ TTGLep ]
-#else:            mc = [ TTGLep, DY_LO_16 , TTbar, singleTop_16, ZGToLLG ]
-
-Run2017_noPreFiring = copy.deepcopy(Run2017)
-mc = [ Run2017 ]
+if args.onlyTTG: mc = [ TTG_17 ]
+else:            mc = [ TTG_17, DY_LO_17, TT_pow_17, singleTop_17, other_17 ]
+#else:            mc = [ TTGLep_17, DY_LO_17 , TT_pow_17, singleTop_17, ZGTo2LG_17, other_17 ]
 
 if args.noData:
-    lumi_scale = data_sample.lumi * 0.001 #41.9
+    lumi_scale = 41.9
     stack      = Stack( mc )
 else:
-    data_sample                = Run2017_noPreFiring
-    data_sample.texName        = "Data (unprefirable)"
-#    data_sample.texName        = "data (legacy)"
-    data_sample.name           = "Data"
+    data_sample                = Run2017
+    data_sample.texName        = "data (legacy)"
+    data_sample.name           = "data"
     data_sample.read_variables = [ "event/I", "run/I" ]
     data_sample.scale          = 1
 
@@ -183,12 +180,11 @@ else:
 stack.extend( [ [s] for s in signals ] )
 
 for sample in mc + signals:
-#    sample.read_variables = read_variables_MC
-    sample.scale          = 1 #lumi_scale
-#    sample.style          = styles.fillStyle( sample.color )
-    sample.style          = styles.fillStyle( ROOT.kOrange-3 )
-    sample.weight         = lambda event, sample: 1.
-#    sample.weight         = lambda event, sample: event.reweightDilepTriggerBackup*event.reweightPU36fb*event.reweightLeptonSF*event.reweightLeptonTrackingSF*event.reweightPhotonSF*event.reweightPhotonElectronVetoSF*event.reweightBTag_SF
+    sample.read_variables = read_variables_MC
+    sample.scale          = lumi_scale
+    sample.style          = styles.fillStyle( sample.color )
+#    sample.weight         = lambda event, sample: 1.
+    sample.weight         = lambda event, sample: event.reweightDilepTriggerBackup*event.reweightPU36fb*event.reweightLeptonSF*event.reweightLeptonTrackingSF*event.reweightPhotonSF*event.reweightPhotonElectronVetoSF*event.reweightBTag_SF
 #    sample.weight         = lambda event, sample: event.reweightDilepTriggerBackup
 #    sample.weight         = lambda event, sample: event.reweightPU36fb
 #    sample.weight         = lambda event, sample: event.reweightLeptonSF
@@ -200,7 +196,7 @@ for sample in mc + signals:
 if args.small:
     for sample in stack.samples:
         sample.normalization=1.
-        sample.reduceFiles( factor=5 )
+        sample.reduceFiles( factor=15 )
         sample.scale /= sample.normalization
 
 weight_ = lambda event, sample: event.weight
@@ -237,18 +233,17 @@ for index, mode in enumerate( allModes ):
     # Define 2l selections
     leptonSelection = cutInterpreter.cutString( mode )
 
-    if not args.noData:    data_sample.setSelectionString( [ getFilterCut( isData=True, year=2017 ),  leptonSelection ] )
-    for sample in mc + signals: sample.setSelectionString( [ getFilterCut( isData=False, year=2017 ), leptonSelection ] ) #, tr.getSelection( "MC" ) ] )
+    if not args.noData:    data_sample.setSelectionString( [ getFilterCut( 2017, isData=True  ), leptonSelection ] )
+    for sample in mc + signals: sample.setSelectionString( [ getFilterCut( 2017, isData=False ), leptonSelection, tr.getSelection( "MC" ) ] )
 
-    Run2017_noPreFiring.addSelectionString( "unPreFirableEvent==1" )
     # Overlap removal
-#    TTGLep.addSelectionString(    "isTTGamma==1" )
-#    TTG_16.addSelectionString(    "isTTGamma==1" )
-#    TT_pow_16.addSelectionString( "isTTGamma==0" )
-#    TTbar.addSelectionString(     "isTTGamma==0" )
-#    ZGTo2LG.addSelectionString(   "isZGamma==1"  )
-#    ZGToLLG.addSelectionString(   "isZGamma==1"  )
-#    DY_LO_16.addSelectionString(  "isZGamma==0"  )
+#    TTGLep_17.addSelectionString(    "isTTGamma==1" )
+    TTG_17.addSelectionString(    "isTTGamma==1" )
+    TT_pow_17.addSelectionString( "isTTGamma==0" )
+#    TTbar_17.addSelectionString(     "isTTGamma==0" )
+#    ZGTo2LG_17.addSelectionString(   "isZGamma==1"  )
+#    ZGToLLG_17.addSelectionString(   "isZGamma==1"  )
+#    DY_LO_17.addSelectionString(  "isZGamma==0"  )
 
     plotting.fill( plots, read_variables=read_variables, sequence=sequence )
 
