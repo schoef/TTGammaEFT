@@ -23,6 +23,7 @@ from TTGammaEFT.plots.multiplicityGood import multiplicityGood
 from TTGammaEFT.plots.massGood         import massGood
 from TTGammaEFT.plots.isolationGood    import isolationGood
 from TTGammaEFT.plots.met              import met
+from TTGammaEFT.plots.htGood           import htGood
 from TTGammaEFT.plots.beam             import beam
 #from TTGammaEFT.plots.checks           import checks
 
@@ -46,6 +47,7 @@ plotListData += multiplicityGood
 plotListData += massGood
 plotListData += isolationGood
 plotListData += met
+plotListData += htGood
 plotListData += beam
 
 plotListData += cutsphotonGood0

@@ -21,6 +21,7 @@ from TTGammaEFT.plots.bjetGood1        import bjetGood1
 from TTGammaEFT.plots.multiplicityGood import multiplicityGood
 from TTGammaEFT.plots.massGood         import massGood
 from TTGammaEFT.plots.met              import met
+from TTGammaEFT.plots.htGood           import htGood
 from TTGammaEFT.plots.beam             import beam
 #from TTGammaEFT.plots.checksGood       import checksGood
 
@@ -36,6 +37,7 @@ plotListData += bjetGood1
 plotListData += multiplicityGood
 plotListData += massGood
 plotListData += met
+plotListData += htGood
 plotListData += beam
 
 plotListDataMC  = plotListData

@@ -26,6 +26,8 @@ from TTGammaEFT.plots.multiplicity     import multiplicity
 from TTGammaEFT.plots.multiplicityGood import multiplicityGood
 from TTGammaEFT.plots.massGood         import massGood
 from TTGammaEFT.plots.met              import met
+from TTGammaEFT.plots.ht               import ht
+from TTGammaEFT.plots.htGood           import htGood
 from TTGammaEFT.plots.beam             import beam
 from TTGammaEFT.plots.metSig           import metSig
 from TTGammaEFT.plots.metSigGood       import metSigGood
@@ -48,6 +50,8 @@ plotListData += multiplicity
 plotListData += multiplicityGood
 plotListData += massGood
 plotListData += met
+plotListData += ht
+plotListData += htGood
 plotListData += beam
 plotListData += metSig
 plotListData += metSigGood

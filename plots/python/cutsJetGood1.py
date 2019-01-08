@@ -47,6 +47,30 @@ cutsJetGood1.append( Plot(
 ))
 
 cutsJetGood1.append( Plot(
+    name      = 'jetGood1_neHEF_detailed',
+    texX      = 'neHEF(jet_{1})',
+    texY      = 'Number of Events',
+    attribute = lambda event, sample: event.JetGood_neHEF[1] if event.nJetGood > 1 else defaultValue,
+    binning   = [ 100, 0., 1 ],
+))
+
+cutsJetGood1.append( Plot(
+    name      = 'jetGood1_neEmEF_detailed',
+    texX      = 'neEmEF(jet_{1})',
+    texY      = 'Number of Events',
+    attribute = lambda event, sample: event.JetGood_neEmEF[1] if event.nJetGood > 1 else defaultValue,
+    binning   = [ 100, 0., 1 ],
+))
+
+cutsJetGood1.append( Plot(
+    name      = 'jetGood1_chEmHEF_detailed',
+    texX      = 'chEmEF(jet_{1})',
+    texY      = 'Number of Events',
+    attribute = lambda event, sample: event.JetGood_chEmEF[1] if event.nJetGood > 1 else defaultValue,
+    binning   = [ 100, 0., 1 ],
+))
+
+cutsJetGood1.append( Plot(
     name      = 'jetGood1_neHEF_tight',
     texX      = 'neHEF(jet_{1})',
     texY      = 'Number of Events',
