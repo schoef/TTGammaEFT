@@ -24,7 +24,7 @@ from TTGammaEFT.Tools.user import postprocessing_datadirectory2016
 logger.info( "Loading data samples from directory %s", os.path.join(data_directory, postprocessing_datadirectory2016 ) )
 
 allSamples = [ 'MuonEG', 'DoubleMuon', 'DoubleEG', 'SingleMuon', 'SingleElectron' ]
-lumi       = 35.9
+lumi       = 35.92
 
 dirs = {}
 for ( run, version ) in [ ( 'B', '_ver2' ), ( 'C', '' ), ( 'D', '' ), ( 'E', '' ), ( 'F', '' ), ( 'G', '' ), ( 'H', '_ver2' ), ( 'H', '_ver3' ) ]:

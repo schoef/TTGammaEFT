@@ -25,7 +25,7 @@ logger.info( "Loading data samples from directory %s", os.path.join(data_directo
 
 allSamples = [ 'MuonEG', 'DoubleMuon', 'DoubleEG', 'SingleMuon', 'SingleElectron' ]
 #allSamples = [ 'SingleMuon' ]
-lumi       = 41.9
+lumi       = 41.86
 
 dirs = {}
 for ( run, version ) in [ ( 'B', '' ), ( 'C', '' ), ( 'D', '' ), ( 'E', '' ), ( 'F', '' ) ]:

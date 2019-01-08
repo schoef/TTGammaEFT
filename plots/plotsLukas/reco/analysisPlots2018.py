@@ -165,7 +165,7 @@ else:            mc = [ DY_LO_18, TT_pow_18, other_18 ]
 #else:            mc = [ TTGLep_18, DY_LO_18, TT_pow_18, singleTop_18, ZGTo2LG_18, other_18 ]
 
 if args.noData:
-    lumi_scale = 60.0
+    lumi_scale = 58.83
     stack      = Stack( mc )
 else:
     data_sample                = Run2018
