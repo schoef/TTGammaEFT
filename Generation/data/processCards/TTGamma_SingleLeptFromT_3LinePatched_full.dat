@@ -1,0 +1,18 @@
+set group_subprocesses Auto
+set ignore_six_quark_processes False
+set loop_optimized_output True
+set complex_mass_scheme False
+
+import model dim6top_LO_UFO
+
+define p = p b b~
+define j = j b b~
+
+define partl = ve vm vt e- mu- ve~ vm~ vt~ e+ mu+ ta- ta+
+define partq = u c d s u~ c~ d~ s~
+
+generate    p p > t t~ a DIM6=0, (t > b partl partl       DIM6=0), (t~ > b~ partq partq        DIM6=0) @1
+add process p p > t t~   DIM6=0, (t > b partl partl a $$t DIM6=0), (t~ > b~ partq partq        DIM6=0) @2
+add process p p > t t~   DIM6=0, (t > b partl partl       DIM6=0), (t~ > b~ partq partq a $$t~ DIM6=0) @3
+
+
