@@ -279,7 +279,7 @@ if sample.isData:
     elif options.year == 2017:
         sample.json = '$CMSSW_BASE/src/TTGammaEFT/Tools/data/json/Cert_294927-306462_13TeV_EOY2017ReReco_Collisions17_JSON.txt'
     elif options.year == 2018:
-        sample.json = '$CMSSW_BASE/src/TTGammaEFT/Tools/data/json/Cert_314472-322381_13TeV_PromptReco_Collisions18_JSON.txt'
+        sample.json = '$CMSSW_BASE/src/TTGammaEFT/Tools/data/json/Cert_314472-325175_13TeV_PromptReco_Collisions18_JSON.txt'
     else:
         raise NotImplementedError
 
@@ -636,7 +636,8 @@ def filler( event ):
     event.nElectronTight = len(tightElectrons)
     event.nMuonTight     = len(tightMuons)
 
-    fill_vector_collection( event, "Lepton",     nanoLeptonVars, basicLeptons )
+    fill_vector_collection( event, "Lepton",     nanoLeptonVars, allLeptons )
+#    fill_vector_collection( event, "Lepton",     nanoLeptonVars, basicLeptons )
     fill_vector_collection( event, "LeptonGood", nanoLeptonVars, looseLeptons )
 
     # Photons
@@ -647,6 +648,7 @@ def filler( event ):
     mediumPhotons = getGoodParticles( photonSelector( 'medium', year=options.year ), allPhotons )
 
     # DeltaR cleaning
+    allPhotons    = deltaRCleaning( allPhotons,    basicLeptons,    dRCut=0.1 )
     basicPhotons  = deltaRCleaning( basicPhotons,  basicLeptons,    dRCut=0.1 )
     mediumPhotons = deltaRCleaning( mediumPhotons, selectedLeptons, dRCut=0.1 )
 
@@ -660,21 +662,28 @@ def filler( event ):
     looseJets = getGoodParticles( jetSelector( 'loose' ), allJets )
 
     # DeltaR cleaning
-    basicJets = deltaRCleaning( basicJets, basicLeptons,    dRCut=0.4 )
-    basicJets = deltaRCleaning( basicJets, basicPhotons,    dRCut=0.1 )
+    allJets   = deltaRCleaning( allJets,   basicLeptons,    dRCut=0.4 )
+    allJets   = deltaRCleaning( allJets,   basicPhotons,    dRCut=0.1 )
+#    basicJets = deltaRCleaning( basicJets, basicLeptons,    dRCut=0.4 )
+#    basicJets = deltaRCleaning( basicJets, basicPhotons,    dRCut=0.1 )
     looseJets = deltaRCleaning( looseJets, selectedLeptons, dRCut=0.4 )
     looseJets = deltaRCleaning( looseJets, mediumPhotons,   dRCut=0.1 )
     
     # Store jets
-    event.nJet     = len(basicJets)
+    event.nJet     = len(allJets)
+#    event.nJet     = len(basicJets)
     event.nJetGood = len(looseJets)
 
-    fill_vector_collection( event, "Jet",     nanoJetVars, basicJets )
+    fill_vector_collection( event, "Jet",     nanoJetVars, allJets )
+#    fill_vector_collection( event, "Jet",     nanoJetVars, basicJets )
     fill_vector_collection( event, "JetGood", nanoJetVars, looseJets )
 
     # bJets
-    basicBJets    = filterBJets(    basicJets, tagger=tagger, year=options.year )
-    basicNonBJets = filterNonBJets( basicJets, tagger=tagger, year=options.year )
+    allBJets    = filterBJets(      allJets, tagger=tagger, year=options.year )
+    allNonBJets = filterNonBJets(   allJets, tagger=tagger, year=options.year )
+
+#    basicBJets    = filterBJets(    basicJets, tagger=tagger, year=options.year )
+#    basicNonBJets = filterNonBJets( basicJets, tagger=tagger, year=options.year )
 
     looseBJets    = filterBJets(    looseJets, tagger=tagger, year=options.year )
     looseNonBJets = filterNonBJets( looseJets, tagger=tagger, year=options.year )
@@ -684,7 +693,8 @@ def filler( event ):
     if bj0: fill_vector( event, "Bj0", nanoBJetVars, bj0 )
     if bj1: fill_vector( event, "Bj1", nanoBJetVars, bj1 )
 
-    event.nBTag     = len(basicBJets)
+    event.nBTag     = len(allBJets)
+#    event.nBTag     = len(basicBJets)
     event.nBTagGood = len(looseBJets)
 
     # Additional observables
@@ -692,7 +702,8 @@ def filler( event ):
     event.m3wBJet    = m3( looseJets, nBJets=1, tagger=tagger, year=options.year )[0]
     event.htGood     = sum( [ j['pt'] for j in looseJets ] )
     event.METSigGood = r.MET_pt / sqrt( event.htGood ) if event.htGood > 0 else defaultValue
-    event.ht         = sum( [ j['pt'] for j in basicJets ] )
+    event.ht         = sum( [ j['pt'] for j in allJets ] )
+#    event.ht         = sum( [ j['pt'] for j in basicJets ] )
     event.METSig     = r.MET_pt / sqrt( event.ht ) if event.ht > 0 else defaultValue
 
     # Store photons
@@ -726,9 +737,11 @@ def filler( event ):
             event.j1GammadPhi = deltaPhi( looseJets[1]['phi'], mediumPhotons[0]['phi'] )
             event.j1GammadR   = deltaR( looseJets[1], mediumPhotons[0] )
 
-    fill_vector_collection( event, "Photon",     nanoPhotonVars,                                                                        basicPhotons    )
+    fill_vector_collection( event, "Photon",     nanoPhotonVars, allPhotons )
+#    fill_vector_collection( event, "Photon",     nanoPhotonVars, basicPhotons )
     fill_vector_collection( event, "PhotonGood", nanoPhotonVars + ['photonCat'] if isMC and len(mediumPhotons) > 0 else nanoPhotonVars, mediumPhotons )
-    event.nPhoton     = len( basicPhotons )
+    event.nPhoton     = len( allPhotons )
+#    event.nPhoton     = len( basicPhotons )
     event.nPhotonGood = len( mediumPhotons )
 
     if bj1:

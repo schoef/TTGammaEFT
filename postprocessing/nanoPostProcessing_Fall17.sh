@@ -11,7 +11,7 @@ python nanoPostProcessing.py --overwrite --skim dilep --year 2017 --processingEr
 python nanoPostProcessing.py --overwrite --skim dilep --year 2017 --processingEra TTGammaEFT_PP_2017_TTG_v1 --sample TTbar                  --fileBasedSplitting #SPLIT49
 
 python nanoPostProcessing.py --overwrite --skim dilep --year 2017 --processingEra TTGammaEFT_PP_2017_TTG_v1 --sample DYJetsToLL_M50_LO_ext1  --fileBasedSplitting #SPLIT70
-python nanoPostProcessing.py --overwrite --skim dilep --year 2017 --processingEra TTGammaEFT_PP_2017_TTG_v1 --sample DYJetsToLL_M10to50_LO  --fileBasedSplitting #SPLIT84
+python nanoPostProcessing.py --overwrite --skim dilep --year 2017 --processingEra TTGammaEFT_PP_2017_TTG_v1 --sample DYJetsToLL_M10to50_LO  --fileBasedSplitting #SPLIT42
 
 python nanoPostProcessing.py --overwrite --skim dilep --year 2017 --processingEra TTGammaEFT_PP_2017_TTG_v1 --sample T_tWch_ext              --fileBasedSplitting #SPLIT5
 python nanoPostProcessing.py --overwrite --skim dilep --year 2017 --processingEra TTGammaEFT_PP_2017_TTG_v1 --sample TBar_tWch_ext           --fileBasedSplitting #SPLIT6
