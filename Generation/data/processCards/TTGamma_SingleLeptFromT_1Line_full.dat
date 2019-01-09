@@ -11,5 +11,5 @@ define j = j b b~
 define partl = ve vm vt e- mu- ve~ vm~ vt~ e+ mu+ ta- ta+
 define partq = u c d s u~ c~ d~ s~
 
-generate p p > b b~ partl partl partq partq a DIM6=0
+generate p p > t t~ > b b~ partl partl partq partq a DIM6=0
 
