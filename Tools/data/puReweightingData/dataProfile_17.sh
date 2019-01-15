@@ -2,7 +2,7 @@
 
 PILEUP_LATEST=/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions17/13TeV/PileUp/pileup_latest.txt
 JSON=/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions17/13TeV/ReReco/Cert_294927-306462_13TeV_EOY2017ReReco_Collisions17_JSON.txt
-LUMI=41500
+LUMI=41860
 
 if [ ! -f "$PILEUP_LATEST" ]; then
    echo "File $PILEUP_LATEST does not exist on this site, copying from lxplus"
