@@ -10,15 +10,13 @@ import logging
 logger = logging.getLogger(__name__)
 
 #binning in pt and eta
-ptBorders = [30, 50, 70, 100, 140, 200, 300, 600, 1000]
-#ptBorders = [30, 40, 50, 60, 70, 80, 100, 120, 160, 210, 260, 320, 400, 500, 670]
+ptBorders = [20, 30, 50, 70, 100, 140, 200, 300, 600, 1000]
+ptBins    = [ [ptBorders[i], ptBorders[i+1]] for i in range(len(ptBorders)-1) ]
+ptBins   += [ [ptBorders[-1], -1] ]
 
-ptBins = []
-etaBins = [[0,0.8], [0.8,1.6], [ 1.6, 2.4]]
-for i in range(len(ptBorders)-1):
-    ptBins.append([ptBorders[i], ptBorders[i+1]])
-
-ptBins.append([ptBorders[-1], -1])
+#etaBins = [[0,0.8], [0.8,1.6], [ 1.6, 2.4]]
+etaBins2016 = [[0,2.4]]
+etaBins2017 = [[0,2.5]]
 
 def toFlavourKey(pdgId):
     if abs(pdgId)==5: return ROOT.BTagEntry.FLAV_B
@@ -27,22 +25,24 @@ def toFlavourKey(pdgId):
 
 
 #Method 1ab
-effFile2016      = 'TTLep_pow_Moriond17_2j_2l.pkl'
-effFile2017      = 'TTLep_pow_Moriond17_2j_2l.pkl'
-effFile2018      = 'TTLep_pow_Moriond17_2j_2l.pkl'
-#effFile          = 'TTJets_DiLepton_comb_2j_2l.pkl'
-sfFile_FastSim   = 'fastsim_csvv2_ttbar_26_1_2017.csv'
+effFile2016DeepCSV = 'TTLep_pow_Moriond17_2j_2l.pkl' #TTLep_pow_2016_2j_2l_DeepB_eta.pkl'
+effFile2017DeepCSV = 'TTLep_pow_2017_2j_2l_DeepB_eta.pkl'
+effFile2018DeepCSV = 'TTLep_pow_2018_2j_2l_DeepB_eta.pkl'
 
-# Not working with 2017/2018 for now
-# Not working with deepCSV for now
-sfFile2016DeepCSV = 'b2016_DeepCSV_Moriond17_B_H.csv'
-sfFile2017DeepCSV = 'b2017_DeepCSV_94XSF_V3_B_F.csv'
-sfFile2018DeepCSV = 'b2017_DeepCSV_94XSF_V3_B_F.csv'
+effFile2016CSVv2   = 'TTLep_pow_Moriond17_2j_2l.pkl' #TTLep_pow_2016_2j_2l_CSVv2_eta.pkl'
+effFile2017CSVv2   = 'TTLep_pow_2017_2j_2l_CSVv2_eta.pkl'
+effFile2018CSVv2   = 'TTLep_pow_2018_2j_2l_CSVv2_eta.pkl'
 
-sfFile2016CSVv2 = 'b2016_CSVv2_Moriond17_B_H.csv'
-sfFile2017CSVv2 = 'b2017_CSVv2_94XSF_V2_B_F.csv'
-sfFile2018CSVv2 = 'b2017_CSVv2_94XSF_V2_B_F.csv'
+# Not working with FastSim for now
+sfFile_FastSim     = 'fastsim_csvv2_ttbar_26_1_2017.csv'
 
+sfFile2016DeepCSV  = 'b2016_DeepCSV_Moriond17_B_H.csv'
+sfFile2017DeepCSV  = 'b2017_DeepCSV_94XSF_V3_B_F.csv'
+sfFile2018DeepCSV  = 'b2017_DeepCSV_94XSF_V3_B_F.csv'
+
+sfFile2016CSVv2    = 'b2016_CSVv2_Moriond17_B_H.csv'
+sfFile2017CSVv2    = 'b2017_CSVv2_94XSF_V2_B_F.csv'
+sfFile2018CSVv2    = 'b2017_CSVv2_94XSF_V2_B_F.csv'
 
 class BTagEfficiency:
 
@@ -103,34 +103,37 @@ class BTagEfficiency:
 
         # Input files
         if year == 2016:
+            self.etaBins = etaBins2016
             if tagger == 'CSVv2':
                 self.scaleFactorFile   = os.path.expandvars( os.path.join( self.dataDir, sfFile2016CSVv2 ) )
                 self.scaleFactorFileFS = os.path.expandvars( os.path.join( self.dataDir, sfFile_FastSim ) )
-                self.mcEfficiencyFile  = os.path.expandvars( os.path.join( self.dataDir, effFile2016 ) )
+                self.mcEfficiencyFile  = os.path.expandvars( os.path.join( self.dataDir, effFile2016CSVv2 ) )
             elif tagger == 'DeepCSV':
                 self.scaleFactorFile   = os.path.expandvars( os.path.join( self.dataDir, sfFile2016DeepCSV ) )
                 self.scaleFactorFileFS = os.path.expandvars( os.path.join( self.dataDir, sfFile_FastSim ) )
-                self.mcEfficiencyFile  = os.path.expandvars( os.path.join( self.dataDir, effFile2016 ) )
+                self.mcEfficiencyFile  = os.path.expandvars( os.path.join( self.dataDir, effFile2016DeepCSV ) )
 
         if year == 2017:
+            self.etaBins = etaBins2017
             if tagger == 'CSVv2':
                 self.scaleFactorFile   = os.path.expandvars( os.path.join( self.dataDir, sfFile2017CSVv2 ) )
                 self.scaleFactorFileFS = os.path.expandvars( os.path.join( self.dataDir, sfFile_FastSim ) )
-                self.mcEfficiencyFile  = os.path.expandvars( os.path.join( self.dataDir, effFile2017 ) )
+                self.mcEfficiencyFile  = os.path.expandvars( os.path.join( self.dataDir, effFile2017CSVv2 ) )
             elif tagger == 'DeepCSV':
                 self.scaleFactorFile   = os.path.expandvars( os.path.join( self.dataDir, sfFile2017DeepCSV ) )
                 self.scaleFactorFileFS = os.path.expandvars( os.path.join( self.dataDir, sfFile_FastSim ) )
-                self.mcEfficiencyFile  = os.path.expandvars( os.path.join( self.dataDir, effFile2017 ) )
+                self.mcEfficiencyFile  = os.path.expandvars( os.path.join( self.dataDir, effFile2017DeepCSV ) )
 
         if year == 2018:
+            self.etaBins = etaBins2017
             if tagger == 'CSVv2':
                 self.scaleFactorFile   = os.path.expandvars( os.path.join( self.dataDir, sfFile2018CSVv2 ) )
                 self.scaleFactorFileFS = os.path.expandvars( os.path.join( self.dataDir, sfFile_FastSim ) )
-                self.mcEfficiencyFile  = os.path.expandvars( os.path.join( self.dataDir, effFile2018 ) )
+                self.mcEfficiencyFile  = os.path.expandvars( os.path.join( self.dataDir, effFile2018CSVv2 ) )
             elif tagger == 'DeepCSV':
                 self.scaleFactorFile   = os.path.expandvars( os.path.join( self.dataDir, sfFile2018DeepCSV ) )
                 self.scaleFactorFileFS = os.path.expandvars( os.path.join( self.dataDir, sfFile_FastSim ) )
-                self.mcEfficiencyFile  = os.path.expandvars( os.path.join( self.dataDir, effFile2018 ) )
+                self.mcEfficiencyFile  = os.path.expandvars( os.path.join( self.dataDir, effFile2018DeepCSV ) )
 
         logger.info ( "Loading scale factors from %s", self.scaleFactorFile )
         ROOT.gSystem.Load( 'libCondFormatsBTauObjects' ) 
@@ -165,7 +168,7 @@ class BTagEfficiency:
         for ptBin in ptBins:
             if pt>=ptBin[0] and (pt<ptBin[1] or ptBin[1]<0):
                 aeta=abs(eta)
-                for etaBin in etaBins:
+                for etaBin in self.etaBins:
                     if abs(aeta)>=etaBin[0] and abs(aeta)<etaBin[1]:
                         if abs(pdgId)==5:      return  self.mcEff[tuple(ptBin)][tuple(etaBin)]["b"]
                         elif abs(pdgId)==4:    return  self.mcEff[tuple(ptBin)][tuple(etaBin)]["c"]
@@ -181,6 +184,14 @@ class BTagEfficiency:
                 return (1,1,1,1,1,1,1)
             else:
                 return (1,1,1,1,1)
+
+        # BTag SF Not implemented above absEta 2.4
+        if abs(eta)>=2.4: 
+            if self.fastSim:
+                return (1,1,1,1,1,1,1)
+            else:
+                return (1,1,1,1,1)
+
         #autobounds are implemented now, no doubling of uncertainties necessary anymore
         flavKey = toFlavourKey(pdgId)
         
@@ -243,4 +254,39 @@ class btagEfficiency_1d:
         logger.info( "Loading scale factors from %s", self.scaleFactorFile )
         self.calib = ROOT.BTagCalibration("csvv2", self.scaleFactorFile )
         self.readers = {sys: ROOT.BTagCalibrationReader(self.calib, ROOT.BTagEntry.OP_RESHAPING, "iterativefit", sys) for sys in self.btagWeightNames}
+
+
+if __name__ == "__main__":
+    BTagEff = BTagEfficiency( year=2016,tagger="DeepCSV" )
+    print BTagEff.getSF(5, 100, 1.5)[0]
+    print BTagEff.getSF(5, 100, -1.5)[0]
+    print BTagEff.getSF(5, 100, 2)[0]
+    print BTagEff.getSF(5, 100, -2)[0]
+    print BTagEff.getSF(5, 400, 1.5)[0]
+    print BTagEff.getSF(5, 400, -1.5)[0]
+    print BTagEff.getSF(5, 400, 2)[0]
+    print BTagEff.getSF(5, 400, -2)[0]
+    del BTagEff
+
+    BTagEff = BTagEfficiency( year=2017,tagger="DeepCSV" )
+    print BTagEff.getSF(5, 100, 1.5)[0]
+    print BTagEff.getSF(5, 100, -1.5)[0]
+    print BTagEff.getSF(5, 100, 2)[0]
+    print BTagEff.getSF(5, 100, -2)[0]
+    print BTagEff.getSF(5, 400, 1.5)[0]
+    print BTagEff.getSF(5, 400, -1.5)[0]
+    print BTagEff.getSF(5, 400, 2)[0]
+    print BTagEff.getSF(5, 400, -2)[0]
+    del BTagEff
+
+    BTagEff = BTagEfficiency( year=2018,tagger="DeepCSV" )
+    print BTagEff.getSF(5, 100, 1.5)[0]
+    print BTagEff.getSF(5, 100, -1.5)[0]
+    print BTagEff.getSF(5, 100, 2)[0]
+    print BTagEff.getSF(5, 100, -2)[0]
+    print BTagEff.getSF(5, 400, 1.5)[0]
+    print BTagEff.getSF(5, 400, -1.5)[0]
+    print BTagEff.getSF(5, 400, 2)[0]
+    print BTagEff.getSF(5, 400, -2)[0]
+    del BTagEff
 
