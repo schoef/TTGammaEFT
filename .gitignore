@@ -8,3 +8,5 @@ nohup.out
 *.tmp
 testing
 py.py
+ME5_debug
+MG5_debug
