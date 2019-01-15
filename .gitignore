@@ -6,6 +6,7 @@ nohup.out
 #*#
 *~
 *.tmp
+*.l√og
 testing
 py.py
 ME5_debug
