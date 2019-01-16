@@ -52,3 +52,11 @@ cutsPhotonNoIdCuts0.append( Plot(
     attribute = lambda event, sample: event.PhotonNoChgIso0_pfRelIso03_chg,
     binning   = [ 20, 0, 20 ],
 ))
+
+cutsPhotonNoIdCuts0.append( Plot(
+    name      = 'PhotonNoChgIso0_pfRelIso03_chg_low',
+    texX      = 'charged relIso_{0.3}(#gamma_{0})',
+    texY      = 'Number of Events',
+    attribute = lambda event, sample: event.PhotonNoChgIso0_pfRelIso03_chg,
+    binning   = [ 20, 0, 2 ],
+))

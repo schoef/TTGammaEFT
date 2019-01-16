@@ -8,7 +8,7 @@ from TTXPheno.Tools.CutInterpreter import CutInterpreter
 special_cuts = {
     "OS":                "(LeptonGood_pdgId[0]*LeptonGood_pdgId[1])<0",
     "looseLeptonVeto":   "nLeptonVeto==2",
-    "dilep":             "nLeptonGood==2&&nLeptonTight>=1",
+    "dilep":             "nLeptonGood==2&&nLeptonGoodLead>=1",
     "dilepOS":           "nLeptonGood==2&&nLeptonTight>=1&&(LeptonGood_pdgId[0]*LeptonGood_pdgId[1])<0",
     "dilepSS":           "nLeptonGood==2&&nLeptonTight>=1&&(LeptonGood_pdgId[0]*LeptonGood_pdgId[1])>0",
     "dilepOFOS":         "nLeptonGood==2&&nLeptonTight>=1&&(LeptonGood_pdgId[0]*LeptonGood_pdgId[1])<0&&nElectronGood==1&&nMuonGood==1",

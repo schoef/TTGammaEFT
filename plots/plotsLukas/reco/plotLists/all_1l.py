@@ -25,12 +25,13 @@ from TTGammaEFT.plots.met               import met
 from TTGammaEFT.plots.ht                import ht
 from TTGammaEFT.plots.beam              import beam
 
-from TTGammaEFT.plots.cutsJetGood0        import cutsJetGood0
-from TTGammaEFT.plots.cutsJetGood1        import cutsJetGood1
-from TTGammaEFT.plots.cutsLeptonTight0    import cutsLeptonTight0
-from TTGammaEFT.plots.cutsLeptonTight1    import cutsLeptonTight1
-from TTGammaEFT.plots.cutsPhotonGood0     import cutsPhotonGood0
-from TTGammaEFT.plots.cutsPhotonNoIdCuts0 import cutsPhotonNoIdCuts0
+from TTGammaEFT.plots.cutsJetGood0            import cutsJetGood0
+from TTGammaEFT.plots.cutsJetGood1            import cutsJetGood1
+from TTGammaEFT.plots.cutsLeptonTight0        import cutsLeptonTight0
+from TTGammaEFT.plots.cutsLeptonTight1        import cutsLeptonTight1
+from TTGammaEFT.plots.cutsPhotonGood0         import cutsPhotonGood0
+from TTGammaEFT.plots.cutsPhotonNoIdCuts0     import cutsPhotonNoIdCuts0
+from TTGammaEFT.plots.cutsPhotonNoIdCuts0_nPV import cutsPhotonNoIdCuts0_nPV
 
 # plotList
 plotListData  = []
@@ -54,6 +55,7 @@ plotListData += cutsLeptonTight0
 plotListData += cutsLeptonTight1
 plotListData += cutsPhotonGood0
 plotListData += cutsPhotonNoIdCuts0
+plotListData += cutsPhotonNoIdCuts0_nPV
 
 plotListDataMC = plotListData
 
