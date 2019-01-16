@@ -237,9 +237,9 @@ for index, mode in enumerate( allModes ):
     for sample in mc + signals: sample.setSelectionString( [ getFilterCut( 2016, isData=False ), leptonSelection, tr.getSelection( "MC" ) ] )
 
     # Overlap removal
-    if any( x.name == "TT_pow" for x in mc ) and any( x.name == "TTG" for x in mc ):
-        eval('TT_pow_' + str(args.year)[-2:]).addSelectionString( "isTTGamma==0" )
+    if any( x.name == "TTG" for x in mc ) and any( x.name == "TT_pow" for x in mc ):
         eval('TTG_'    + str(args.year)[-2:]).addSelectionString( "isTTGamma==1" )
+        eval('TT_pow_' + str(args.year)[-2:]).addSelectionString( "isTTGamma==0" )
 
     if any( x.name == "ZG" for x in mc ) and any( x.name == "DY_LO" for x in mc ):
         eval('ZG_'    + str(args.year)[-2:]).addSelectionString( "isZWGamma==1" )
@@ -249,9 +249,9 @@ for index, mode in enumerate( allModes ):
         eval('WG_' + str(args.year)[-2:]).addSelectionString(    "isZWGamma==1" )
         eval('WJets_' + str(args.year)[-2:]).addSelectionString( "isZWGamma==0" )
 
-    if any( x.name == "singleTop" for x in mc ) and any( x.name == "TG" for x in mc ):
-        eval('singleTop_' + str(args.year)[-2:]).addSelectionString( "isSingleTopTch==1" )
-        eval('TG_' + str(args.year)[-2:]).addSelectionString(        "isSingleTopTch==0" )
+    if any( x.name == "TG" for x in mc ) and any( x.name == "singleTop" for x in mc ):
+        eval('TG_' + str(args.year)[-2:]).addSelectionString(        "isSingleTopTch==1" )
+        eval('singleTop_' + str(args.year)[-2:]).addSelectionString( "isSingleTopTch==0" ) #ONLY IN THE T-channel!!!
 
     plotting.fill( plots, read_variables=read_variables, sequence=sequence )
 
