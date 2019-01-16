@@ -19,15 +19,15 @@ from TTGammaEFT.plots.bjetGood0                import bjetGood0
 from TTGammaEFT.plots.bjetGood1                import bjetGood1
 from TTGammaEFT.plots.multiplicityGoodNoPhoton import multiplicityGoodNoPhoton
 from TTGammaEFT.plots.massGood                 import massGood
+from TTGammaEFT.plots.isolationGood            import isolationGood
 from TTGammaEFT.plots.met                      import met
-from TTGammaEFT.plots.htGood                   import htGood
+from TTGammaEFT.plots.ht                       import ht
 from TTGammaEFT.plots.beam                     import beam
-#from TTGammaEFT.plots.checksGood               import checksGood
 
-from TTGammaEFT.plots.cutsLeptonGood0          import cutsLeptonGood0
-from TTGammaEFT.plots.cutsLeptonGood1          import cutsLeptonGood1
-from TTGammaEFT.plots.cutsJetGood0             import cutsJetGood0
-from TTGammaEFT.plots.cutsJetGood1             import cutsJetGood1
+from TTGammaEFT.plots.cutsJetGood0     import cutsJetGood0
+from TTGammaEFT.plots.cutsJetGood1     import cutsJetGood1
+from TTGammaEFT.plots.cutsLeptonGood0  import cutsLeptonGood0
+from TTGammaEFT.plots.cutsLeptonGood1  import cutsLeptonGood1
 
 # plotList
 plotListData  = []
@@ -39,15 +39,15 @@ plotListData += bjetGood0
 plotListData += bjetGood1
 plotListData += multiplicityGoodNoPhoton
 plotListData += massGood
+plotListData += isolationGood
 plotListData += met
-plotListData += htGood
+plotListData += ht
 plotListData += beam
 
-plotListData += cutsLeptonGood0
-plotListData += cutsLeptonGood1
 plotListData += cutsJetGood0
 plotListData += cutsJetGood1
+plotListData += cutsLeptonGood0
+plotListData += cutsLeptonGood1
 
 plotListDataMC = plotListData
-#plotListDataMC += checks
 
