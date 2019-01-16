@@ -173,13 +173,13 @@ sequence = []
 # Sample definition
 if args.year == 2016:
     if args.onlyTTG: mc = [ TTGLep_16 ]
-    else:            mc = [ TT_pow_16, TTGLep_16, DY_LO_16, singleTop_16, ZGTo2LG_16, other_16 ]
+    else:            mc = [ TTG_16, DY_LO_16, TT_pow_16, singleTop_16, ZG_16, other_16 ]
 elif args.year == 2017:
     if args.onlyTTG: mc = [ TTG_17 ]
     else:            mc = [ TTG_17, DY_LO_17, TT_pow_17, singleTop_17, other_17 ]
 elif args.year == 2018:
     if args.onlyTTG: mc = [ ]
-    else:            mc = [ DY_LO_18, TT_pow_18, other_18 ]
+    else:            mc = [ DY_LO_18, TT_pow_18, singleTop_18, other_18 ]
 
 if args.noData:
     if args.year == 2016:   lumi_scale = 35.92
@@ -249,19 +249,13 @@ for index, mode in enumerate( allModes ):
     for sample in mc + signals: sample.setSelectionString( [ getFilterCut( 2016, isData=False ), leptonSelection, tr.getSelection( "MC" ) ] )
 
     # Overlap removal
-    if any( x.name == "TTbar" or x.name == "TTLep_pow" for x in mc ) and any( x.name == "TTGLep" for x in mc ):
-        if any( x.name == "TTbar" for x in mc ):     eval('TTbar_' + str(args.year)[-2:]).addSelectionString(  "isTTGamma==0" )
-        if any( x.name == "TTLep_pow" for x in mc ): eval('TT_pow_' + str(args.year)[-2:]).addSelectionString( "isTTGamma==0" )
-        eval('TTGLep_' + str(args.year)[-2:]).addSelectionString( "isTTGamma==1" )
+    if any( x.name == "TT_pow" for x in mc ) and any( x.name == "TTG" for x in mc ):
+        eval('TT_pow_' + str(args.year)[-2:]).addSelectionString( "isTTGamma==0" )
+        eval('TTG_'    + str(args.year)[-2:]).addSelectionString( "isTTGamma==1" )
 
-    if any( x.name == "ZGTo2LG" or x.name == "ZGToLLG" for x in mc ) and any( x.name == "DY_LO" for x in mc ):
-        if any( x.name == "ZGTo2LG" for x in mc ):   eval('ZGTo2LG_' + str(args.year)[-2:]).addSelectionString(   "isZWGamma==1" )
-        if any( x.name == "ZGToLLG" for x in mc ):   eval('ZGToLLG_' + str(args.year)[-2:]).addSelectionString(   "isZWGamma==1" )
+    if any( x.name == "ZG" for x in mc ) and any( x.name == "DY_LO" for x in mc ):
+        eval('ZG_'    + str(args.year)[-2:]).addSelectionString( "isZWGamma==1" )
         eval('DY_LO_' + str(args.year)[-2:]).addSelectionString( "isZWGamma==0" )
-
-    if any( x.name == "singleTop" for x in mc ) and any( x.name == "TGJets" for x in mc ):
-        eval('singleTop_' + str(args.year)[-2:]).addSelectionString( "isSingleTopTch==1" )
-        eval('TGJets_' + str(args.year)[-2:]).addSelectionString(    "isSingleTopTch==0" )
 
     plotting.fill( plots, read_variables=read_variables, sequence=sequence )
 
