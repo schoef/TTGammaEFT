@@ -432,7 +432,7 @@ if isMC:
     new_variables += [ 'GenJet[%s]'      %nanoGenJetVarString ]
     new_variables += [ 'GenBJet[%s]'     %nanoGenJetVarString ]
     new_variables += [ 'GenTop[%s]'      %nanoGenVarString ]
-    new_variables += [ 'isTTGamma/I', 'isZWGamma/I', 'isSingleT/I' ]
+    new_variables += [ 'isTTGamma/I', 'isZWGamma/I', 'isSingleTopTch/I' ]
 
     new_variables += [ 'reweightPU/F', 'reweightPUDown/F', 'reweightPUUp/F', 'reweightPUVDown/F', 'reweightPUVUp/F' ]
 
