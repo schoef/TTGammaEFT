@@ -12,36 +12,36 @@ from RootTools.core.standard          import *
 from TTGammaEFT.Tools.constants       import defaultValue
 
 # plotList
-leptonGood0 = []
+leptonTight0 = []
 
-leptonGood0.append( Plot(
-    name      = 'leptonGood0_pt',
+leptonTight0.append( Plot(
+    name      = 'leptonTight0_pt',
     texX      = 'p_{T}(l_{0}) (GeV)',
     texY      = 'Number of Events / 15 GeV',
-    attribute = lambda event, sample: event.LeptonGood0_pt if event.nLeptonGood > 0 else defaultValue,
+    attribute = lambda event, sample: event.LeptonTight0_pt if event.nLeptonTight > 0 else defaultValue,
     binning   = [ 20, 0, 300 ],
 ))
 
-leptonGood0.append( Plot(
-    name      = 'leptonGood0_eta',
+leptonTight0.append( Plot(
+    name      = 'leptonTight0_eta',
     texX      = '#eta(l_{0})',
     texY      = 'Number of Events',
-    attribute = lambda event, sample: event.LeptonGood0_eta if event.nLeptonGood > 0 else defaultValue,
+    attribute = lambda event, sample: event.LeptonTight0_eta if event.nLeptonTight > 0 else defaultValue,
     binning   = [ 30, -3, 3 ],
 ))
 
-leptonGood0.append( Plot(
-    name      = 'leptonGood0_absEta',
+leptonTight0.append( Plot(
+    name      = 'leptonTight0_absEta',
     texX      = '|#eta|(l_{0})',
     texY      = 'Number of Events',
-    attribute = lambda event, sample: abs(event.LeptonGood0_eta) if event.nLeptonGood > 0 else defaultValue,
+    attribute = lambda event, sample: abs(event.LeptonTight0_eta) if event.nLeptonTight > 0 else defaultValue,
     binning   = [ 15, 0, 3 ],
 ))
 
-leptonGood0.append( Plot(
-    name      = 'leptonGood0_phi',
+leptonTight0.append( Plot(
+    name      = 'leptonTight0_phi',
     texX      = '#phi(l_{0})',
     texY      = 'Number of Events',
-    attribute = lambda event, sample: event.LeptonGood0_phi if event.nLeptonGood > 0 else defaultValue,
+    attribute = lambda event, sample: event.LeptonTight0_phi if event.nLeptonTight > 0 else defaultValue,
     binning   = [ 10, -pi, pi ],
 ))
