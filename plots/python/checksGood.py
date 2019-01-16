@@ -24,9 +24,17 @@ checksGood.append( Plot(
 
 checksGood.append( Plot(
     name      = 'isZG',
-    texX      = 'Flag_{Z#gamma}',
+    texX      = 'Flag_{Z/W#gamma}',
     texY      = 'Number of Events',
-    attribute = lambda event, sample: event.isZGamma,
+    attribute = lambda event, sample: event.isZWGamma,
+    binning   = [ 2, 0, 2 ],
+))
+
+checksGood.append( Plot(
+    name      = 'isZG',
+    texX      = 'Flag_{single-t}',
+    texY      = 'Number of Events',
+    attribute = lambda event, sample: event.isSingleTopTch,
     binning   = [ 2, 0, 2 ],
 ))
 

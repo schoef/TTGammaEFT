@@ -42,7 +42,7 @@ massGood.append( Plot(
     name      = 'mllPhotonGood',
     texX      = 'M(ll#gamma) (GeV)',
     texY      = 'Number of Events / 4 GeV',
-    attribute = lambda event, sample: event.mllgamma if event.nLeptonGood >= 2 else defaultValue,
+    attribute = lambda event, sample: event.mllgamma if event.nLeptonGood >= 2 and event.nPhotonGood >= 1 else defaultValue,
     binning   = [ 50, 0, 200 ],
 ))
 
