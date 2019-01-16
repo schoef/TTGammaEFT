@@ -18,7 +18,7 @@ from TTGammaEFT.Tools.cutInterpreter  import cutInterpreter
 
 from TTGammaEFT.Tools.TriggerSelector import TriggerSelector
 
-from TTGammaEFT.Tools.objectSelection import getFilterCut
+from Samples.Tools.metFilters         import getFilterCut
 from TTGammaEFT.Tools.objectSelection import nanoPlotElectronVars, nanoPlotMuonVars, nanoPlotLeptonVars, nanoPlotTauVars, nanoPlotPhotonVars, nanoPlotJetVars, nanoPlotBJetVars
 from TTGammaEFT.Tools.objectSelection import nanoPlotElectronVarString, nanoPlotMuonVarString, nanoPlotLeptonVarString, nanoPlotTauVarString, nanoPlotPhotonVarString, nanoPlotJetVarString, nanoPlotBJetVarString
 
@@ -248,8 +248,8 @@ for index, mode in enumerate( allModes ):
     # Define 2l selections
     leptonSelection = cutInterpreter.cutString( mode )
 
-    if not args.noData:    data_sample.setSelectionString( [ getFilterCut( isData=True, year=2017 ),  leptonSelection ] )
-    for sample in mc + signals: sample.setSelectionString( [ getFilterCut( isData=False, year=2017 ), leptonSelection ] ) #, tr.getSelection( "MC" ) ] )
+    if not args.noData:    data_sample.setSelectionString( [ getFilterCut( 2017, isData=True ),  leptonSelection ] )
+    for sample in mc + signals: sample.setSelectionString( [ getFilterCut( 2017, isData=False ), leptonSelection ] ) #, tr.getSelection( "MC" ) ] )
 
     Run2017_noPreFiring.addSelectionString( "unPreFirableEvent==1" )
     # Overlap removal
