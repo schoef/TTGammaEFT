@@ -249,7 +249,6 @@ for index, mode in enumerate( allModes ):
     for sample in mc + signals: sample.setSelectionString( [ getFilterCut( 2016, isData=False ), leptonSelection, tr.getSelection( "MC" ) ] )
 
     # Overlap removal
-    # Overlap removal
     if any( x.name == "TTG" for x in mc ) and any( x.name == "TT_pow" for x in mc ):
         eval('TTG_'    + str(args.year)[-2:]).addSelectionString( "isTTGamma==1" )
         eval('TT_pow_' + str(args.year)[-2:]).addSelectionString( "isTTGamma==0" )
