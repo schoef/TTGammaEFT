@@ -2,7 +2,7 @@
 import textwrap
 
 nanoElectronVarString = "deltaEtaSC/F,dr03EcalRecHitSumEt/F,dr03HcalDepth1TowerSumEt/F,dr03TkSumPt/F,dxy/F,dxyErr/F,dz/F,dzErr/F,eInvMinusPInv/F,energyErr/F,eta/F,hoe/F,ip3d/F,mass/F,miniPFRelIso_all/F,miniPFRelIso_chg/F,pfRelIso03_all/F,pfRelIso03_chg/F,phi/F,pt/F,r9/F,sieie/F,sip3d/F,mvaTTH/F,charge/I,cutBased/I,jetIdx/I,pdgId/I,photonIdx/I,tightCharge/I,vidNestedWPBitmap/I,convVeto/O,cutBased_HEEP/O,isPFcand/O,lostHits/b,genPartIdx/I,genPartFlav/b,cleanmask/O"
-nanoMuonVarString     = "dxy/F,dxyErr/F,dz/F,dzErr/F,eta/F,mass/F,dxy/F,miniPFRelIso_all/F,miniPFRelIso_chg/F,pfRelIso03_all/F,pfRelIso03_chg/F,pfRelIso04_all/F,phi/F,pt/F,ptErr/F,segmentComp/F,sip3d/F,mvaTTH/F,charge/I,jetIdx/I,nStations/I,nTrackerLayers/I,pdgId/I,tightCharge/I,highPtId/I,isPFcand/O,mediumId/O,softId/O,tightId/O,genPartIdx/I,genPartFlav/b,cleanmask/O,isGlobal/O,isTracker/O,pfIsoId/I"
+nanoMuonVarString     = "dxy/F,dxyErr/F,dz/F,dzErr/F,eta/F,mass/F,dxy/F,miniPFRelIso_all/F,miniPFRelIso_chg/F,pfRelIso03_all/F,pfRelIso03_chg/F,pfRelIso04_all/F,phi/F,pt/F,ptErr/F,segmentComp/F,sip3d/F,mvaTTH/F,charge/I,jetIdx/I,nStations/I,nTrackerLayers/I,pdgId/I,tightCharge/I,highPtId/I,isPFcand/O,mediumId/O,softId/O,tightId/O,genPartIdx/I,genPartFlav/b,cleanmask/O,isGlobal/O,isTracker/O,pfIsoId/b"
 nanoLeptonVarString   = ','.join( set( nanoElectronVarString.split(',') + nanoMuonVarString.split(',') ) )
 nanoTauVarString      = "chargedIso/F,dxy/F,dz/F,eta/F,footprintCorr/F,leadTkDeltaEta/F,leadTkDeltaPhi/F,leadTkPtOverTauPt/F,mass/F,neutralIso/F,phi/F,photonsOutsideSignalCone/F,pt/F,puCorr/F,rawAntiEle/F,rawIso/F,rawMVAnewDM/F,rawMVAoldDM/F,rawMVAoldDMdR03/F,charge/I,decayMode/I,jetIdx/I,rawAntiEleCat/F,idAntiEle/I,idAntiMu/I,idDecayMode/I,idDecayModeNewDMs/I,idMVAnewDM/I,idMVAoldDM/I,idMVAoldDMdR03/I,genPartIdx/I,genPartFlav/b,cleanmask/O"
 nanoPhotonVarString   = "eta/F,energyErr/F,hoe/F,mass/F,mvaID/F,pfRelIso03_all/F,pfRelIso03_chg/F,phi/F,pt/F,r9/F,sieie/F,charge/I,cutBased/I,electronIdx/I,jetIdx/I,pdgId/I,vidNestedWPBitmap/I,electronVeto/O,mvaID_WP80/O,mvaID_WP90/O,pixelSeed/O,genPartIdx/I,genPartFlav/b,cleanmask/O"
@@ -22,7 +22,7 @@ nanoGenVars      = [item.split('/')[0] for item in nanoGenVarString.split(',')]
 nanoGenJetVars   = [item.split('/')[0] for item in nanoGenJetVarString.split(',')]
 
 nanoDataElectronVarString = "deltaEtaSC/F,dr03EcalRecHitSumEt/F,dr03HcalDepth1TowerSumEt/F,dr03TkSumPt/F,dxy/F,dxyErr/F,dz/F,dzErr/F,eInvMinusPInv/F,energyErr/F,eta/F,hoe/F,ip3d/F,mass/F,miniPFRelIso_all/F,miniPFRelIso_chg/F,pfRelIso03_all/F,pfRelIso03_chg/F,phi/F,pt/F,r9/F,sieie/F,sip3d/F,mvaTTH/F,charge/I,cutBased/I,jetIdx/I,pdgId/I,photonIdx/I,tightCharge/I,vidNestedWPBitmap/I,convVeto/O,cutBased_HEEP/O,isPFcand/O,lostHits/b,cleanmask/O"
-nanoDataMuonVarString     = "dxy/F,dxyErr/F,dz/F,dzErr/F,eta/F,mass/F,dxy/F,miniPFRelIso_all/F,miniPFRelIso_chg/F,pfRelIso03_all/F,pfRelIso03_chg/F,pfRelIso04_all/F,phi/F,pt/F,ptErr/F,segmentComp/F,sip3d/F,mvaTTH/F,charge/I,jetIdx/I,nStations/I,nTrackerLayers/I,pdgId/I,tightCharge/I,highPtId/I,isPFcand/O,mediumId/O,softId/O,tightId/O,cleanmask/O,isGlobal/O,isTracker/O,pfIsoId/I"
+nanoDataMuonVarString     = "dxy/F,dxyErr/F,dz/F,dzErr/F,eta/F,mass/F,dxy/F,miniPFRelIso_all/F,miniPFRelIso_chg/F,pfRelIso03_all/F,pfRelIso03_chg/F,pfRelIso04_all/F,phi/F,pt/F,ptErr/F,segmentComp/F,sip3d/F,mvaTTH/F,charge/I,jetIdx/I,nStations/I,nTrackerLayers/I,pdgId/I,tightCharge/I,highPtId/I,isPFcand/O,mediumId/O,softId/O,tightId/O,cleanmask/O,isGlobal/O,isTracker/O,pfIsoId/b"
 nanoDataLeptonVarString   = ','.join( set( nanoDataElectronVarString.split(',') + nanoDataMuonVarString.split(',') ) )
 nanoDataTauVarString      = "chargedIso/F,dxy/F,dz/F,eta/F,footprintCorr/F,leadTkDeltaEta/F,leadTkDeltaPhi/F,leadTkPtOverTauPt/F,mass/F,neutralIso/F,phi/F,photonsOutsideSignalCone/F,pt/F,puCorr/F,rawAntiEle/F,rawIso/F,rawMVAnewDM/F,rawMVAoldDM/F,rawMVAoldDMdR03/F,charge/I,decayMode/I,jetIdx/I,rawAntiEleCat/F,idAntiEle/I,idAntiMu/I,idDecayMode/I,idDecayModeNewDMs/I,idMVAnewDM/I,idMVAoldDM/I,idMVAoldDMdR03/I,cleanmask/O"
 nanoDataPhotonVarString   = "eta/F,energyErr/F,hoe/F,mass/F,mvaID/I,pfRelIso03_all/F,pfRelIso03_chg/F,phi/F,pt/F,r9/F,sieie/F,charge/I,cutBased/I,electronIdx/I,jetIdx/I,pdgId/I,vidNestedWPBitmap/I,electronVeto/O,mvaID_WP80/O,mvaID_WP90/O,pixelSeed/O,cleanmask/O"
@@ -293,8 +293,8 @@ def muonSelector( lepton_selection, leading=False, noPtEtaCut=False ):
                 if abs(l["eta"])   >= 2.4:                        return False
             if not l["tightId"]:                                  return False
             if not vertexSelector(l):                             return False
-#            if l['pfRelIso03_all'] >= 0.12:                       return False
-            if l['pfIsoId']        <  muonPfIsoId['PFIsoMedium']: return False
+            if l['pfRelIso03_all'] >= 0.12:                       return False
+#            if l['pfIsoId']        <  muonPfIsoId['PFIsoMedium']: return False
             if l["sip3d"]          >= 4:                          return False
             return True
         return func
@@ -307,8 +307,8 @@ def muonSelector( lepton_selection, leading=False, noPtEtaCut=False ):
                 if abs(l["eta"])   >= 2.4:                        return False
             if not l["mediumId"]:                                 return False
             if not vertexSelector(l):                             return False
-#            if l['pfRelIso03_all'] >= 0.12:                       return False
-            if l['pfIsoId']        <  muonPfIsoId['PFIsoMedium']: return False
+            if l['pfRelIso03_all'] >= 0.12:                       return False
+#            if l['pfIsoId']        <  muonPfIsoId['PFIsoMedium']: return False
             if l["sip3d"]          >= 4:                          return False
             return True
         return func
@@ -322,8 +322,8 @@ def muonSelector( lepton_selection, leading=False, noPtEtaCut=False ):
             if not l["isPFcand"]:                                    return False
             if not ( l["isGlobal"] or l["isTracker"] ):              return False
             if not vertexSelector(l):                                return False
-#            if l['pfRelIso03_all'] >= 0.4:                           return False
-            if l['pfIsoId']        <  muonPfIsoId['PFIsoVeryLoose']: return False
+            if l['pfRelIso03_all'] >= 0.4:                           return False
+#            if l['pfIsoId']        <  muonPfIsoId['PFIsoVeryLoose']: return False
             if l["sip3d"]          >= 4:                             return False
             return True
         return func

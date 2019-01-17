@@ -18,7 +18,7 @@ photonGood1.append( Plot(
     name      = 'photonGood1_pt',
     texX      = 'p_{T}(#gamma_{1}) (GeV)',
     texY      = 'Number of Events / 5 GeV',
-    attribute = lambda event, sample: event.PhotonGood_pt[1] if event.nPhotonGood > 1 else defaultValue,
+    attribute = lambda event, sample: event.PhotonGood1_pt if event.nPhotonGood > 1 else defaultValue,
     binning   = [ 19, 20, 115 ],
 ))
 
@@ -26,7 +26,7 @@ photonGood1.append( Plot(
     name      = 'photonGood1_eta',
     texX      = '#eta(#gamma_{1})',
     texY      = 'Number of Events',
-    attribute = lambda event, sample: event.PhotonGood_eta[1] if event.nPhotonGood > 1 else defaultValue,
+    attribute = lambda event, sample: event.PhotonGood1_eta if event.nPhotonGood > 1 else defaultValue,
     binning   = [ 24, -1.8, 1.8 ],
 ))
 
@@ -34,7 +34,7 @@ photonGood1.append( Plot(
     name      = 'photonGood1_absEta',
     texX      = '|#eta|(#gamma_{1})',
     texY      = 'Number of Events',
-    attribute = lambda event, sample: abs(event.PhotonGood_eta[1]) if event.nPhotonGood > 1 else defaultValue,
+    attribute = lambda event, sample: abs(event.PhotonGood1_eta) if event.nPhotonGood > 1 else defaultValue,
     binning   = [ 9, 0, 1.5 ],
 ))
 
@@ -42,7 +42,7 @@ photonGood1.append( Plot(
     name      = 'photonGood1_phi',
     texX      = '#phi(#gamma_{1})',
     texY      = 'Number of Events',
-    attribute = lambda event, sample: event.PhotonGood_phi[1] if event.nPhotonGood > 1 else defaultValue,
+    attribute = lambda event, sample: event.PhotonGood1_phi if event.nPhotonGood > 1 else defaultValue,
     binning   = [ 20, -pi, pi ],
 ))
 

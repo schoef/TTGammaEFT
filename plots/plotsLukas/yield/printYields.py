@@ -13,7 +13,7 @@ from RootTools.core.standard          import *
 
 # Internal Imports
 from TTGammaEFT.Tools.user            import plot_directory
-from TTGammaEFT.Tools.cutInterpreter  import cutInterpreter
+from TTGammaEFT.Tools.cutInterpreterOld  import cutInterpreter
 from TTGammaEFT.Tools.TriggerSelector import TriggerSelector
 
 from Samples.Tools.metFilters         import getFilterCut
@@ -87,7 +87,7 @@ sequence = []
 # Sample definition
 if args.year == 2016:
     if args.onlyTTG: mc = [ TTGLep_16 ]
-    else:            mc = [ TTGLep_16, DY_LO_16, TT_pow_16, singleTop_16, ZGTo2LG_16, other_16 ]
+    else:            mc = [ TT_pow_16, TTGLep_16, DY_LO_16, singleTop_16, ZGTo2LG_16, other_16 ]
 elif args.year == 2017:
     if args.onlyTTG: mc = [ TTGLep_16 ]
     else:            mc = [ TTGLep_16, DY_LO_16, TT_pow_16, singleTop_16, ZGTo2LG_16, other_16 ]
@@ -120,7 +120,7 @@ for sample in mc + signals:
     sample.style          = styles.fillStyle( sample.color )
     sample.weight         = lambda event, sample: event.reweightDilepTriggerBackup*event.reweightPU36fb*event.reweightLeptonSF*event.reweightLeptonTrackingSF*event.reweightPhotonSF*event.reweightPhotonElectronVetoSF*event.reweightBTag_SF
 
-weightString   = "reweightDilepTriggerBackup*reweightPU36fb*reweightLeptonSF*reweightLeptonTrackingSF*reweightPhotonSF*reweightPhotonElectronVetoSF*reweightBTag_SF"
+#weightString   = "weight*reweightDilepTriggerBackup*reweightPU36fb*reweightLeptonSF*reweightLeptonTrackingSF*reweightPhotonSF*reweightPhotonElectronVetoSF*reweightBTag_SF"
 
 if args.small:
     for sample in stack.samples:
@@ -128,7 +128,6 @@ if args.small:
         sample.reduceFiles( factor=15 )
         sample.scale /= sample.normalization
 
-weight_ = lambda event, sample: event.weight
 tr = TriggerSelector( args.year, None )
 
 # Loop over channels
@@ -156,15 +155,18 @@ for index, mode in enumerate( allModes ):
     DY_LO_16.addSelectionString(  "isZGamma==0"  )
 
     print mode
+
+    mcTotal = 0
+    for s in mc:
+        y = s.getYieldFromDraw( selectionString=cutInterpreter.cutString( args.selection ), weightString="weight*%f"%s.scale )['val']
+        yields[mode][s.name] = y
+        mcTotal += y
+        print s.name, "yield", y
+    print "MC Total:", mcTotal
     if not args.noData:
-        y = data_sample.getYieldFromDraw( selectionString=cutInterpreter.cutString( args.selection ) )['val']
+        y = data_sample.getYieldFromDraw( selectionString=cutInterpreter.cutString( args.selection ), weightString="weight*%f"%s.scale )['val']
         yields[mode][data_sample.name] = y
         print data_sample.name, "yield", y
-    for s in mc:
-        y = s.getYieldFromDraw( selectionString=cutInterpreter.cutString( args.selection ), weightString=weightString )['val']
-        yields[mode][s.name] = y
-        print s.name, "yield", y
-    print
 
     # Get yields from draw
 
