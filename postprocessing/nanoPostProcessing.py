@@ -19,7 +19,7 @@ import TTGammaEFT.Tools.user as user
 
 # Tools for systematics
 from TTGammaEFT.Tools.helpers                    import checkRootFile, bestDRMatchInCollection
-from TTGammaEFT.Tools.observables                import deltaR, deltaPhi, m3
+from Analysis.Tools.observables                  import deltaR, deltaPhi, m3
 
 from TTGammaEFT.Tools.objectSelection            import particlePtEtaSelection, deltaRCleaning, photonMediumIDSelector
 from TTGammaEFT.Tools.objectSelection            import getLeptons, getGoodLeptons, getSortedParticles, getUnsortedParticles, getGoodParticles
@@ -33,12 +33,12 @@ from TTGammaEFT.Tools.objectSelection            import nanoDataElectronVarStrin
 
 from TTGammaEFT.Tools.constants                  import defaultValue
 
-from TTGammaEFT.Tools.overlapRemovalTTG          import photonFromTopDecay, hasMesonMother, getParentIds, isIsolatedPhoton, getPhotonCategory
+from Analysis.Tools.overlapRemovalTTG            import photonFromTopDecay, hasMesonMother, getParentIds, isIsolatedPhoton, getPhotonCategory
 
-from TTGammaEFT.Tools.WeightInfo                 import WeightInfo
-from TTGammaEFT.Tools.HyperPoly                  import HyperPoly
+from Analysis.Tools.WeightInfo                   import WeightInfo
+from Analysis.Tools.HyperPoly                    import HyperPoly
 
-from TTGammaEFT.Tools.puProfileCache             import puProfile
+from Analysis.Tools.puProfileCache               import puProfile
 
 # central configuration
 targetLumi = 1000 #pb-1 Which lumi to normalize to

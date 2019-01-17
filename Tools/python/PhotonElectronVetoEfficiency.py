@@ -15,7 +15,7 @@ g_keys = [( "g2016_ScalingFactors_80X_Summer16.root", "Scaling_Factors_CSEV_R9 I
 
 class PhotonElectronVetoEfficiency:
     def __init__( self ):
-        self.dataDir = "$CMSSW_BASE/src/TTGammaEFT/Tools/data/photonSFData"
+        self.dataDir = "$CMSSW_BASE/src/Analysis/Tools/data/photonSFData"
         self.g_sf = [ getObjFromFile(os.path.expandvars(os.path.join(self.dataDir, file)), key) for (file, key) in g_keys ]
 
         for effMap in self.g_sf: assert effMap

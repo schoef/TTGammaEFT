@@ -35,7 +35,7 @@ class LeptonSF:
         if year not in [ 2016, 2017, 2018 ]:
             raise Exception("Lepton SF for year %i not known"%year)
 
-        self.dataDir = "$CMSSW_BASE/src/TTGammaEFT/Tools/data/leptonSFData"
+        self.dataDir = "$CMSSW_BASE/src/Analysis/Tools/data/leptonSFData"
         self.year    = year
 
         if year == 2016:

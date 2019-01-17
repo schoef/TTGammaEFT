@@ -13,7 +13,7 @@ class LeptonTrackingEfficiency:
         if year not in [ 2016, 2017, 2018 ]:
             raise Exception("Lepton Reconstruction Eff for year %i not known"%year)
 
-        self.dataDir = "$CMSSW_BASE/src/TTGammaEFT/Tools/data/leptonSFData/"
+        self.dataDir = "$CMSSW_BASE/src/Analysis/Tools/data/leptonSFData/"
         self.year = year
 
         if self.year == 2016:
